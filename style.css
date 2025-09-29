@@ -39,13 +39,3 @@ textarea.input { width:100%; resize:vertical; min-height:3.5em }
 #leitor textarea.input { min-height: 6.5em; }
 
 footer { opacity:.7; font-size: 12px; margin-top: 20px }
-
-.container {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Faz o leitor aparecer antes visualmente */
-#leitor {
-  order: -1;
-}
