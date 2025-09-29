@@ -48,13 +48,6 @@ header {
 }
 
 h1 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0; letter-spacing: .3px }
-.badge {
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color:#0b1020;
-  font-weight:700;
-}
 
 /* Cartões/base */
 .card {
