@@ -10,14 +10,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Emoji Play"/>
   <link rel="apple-touch-icon" href="icons/icon-192.png"/>
-  <link rel="stylesheet" href="style.css?v=6">
-  <meta name="description" content="Leitor de texto com voz do sistema. PWA com suporte a iOS/Android.">
+  <link rel="stylesheet" href="style.css?v=7">
+  <meta name="description" content="Leitor de texto com voz do sistema (iOS/Android). PWA com modo offline e atualização automática.">
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Emoji Play</h1>
-      <!-- <h1>Emoji Play <span class="badge">PWA</span></h1> -->
+      <h1>Emoji Play <span class="badge">PWA</span></h1>
       <div class="controls card" style="padding:8px 10px">
         <label>Voz:
           <select id="voice" class="select"></select>
@@ -68,7 +67,7 @@
         const u = new SpeechSynthesisUtterance('');
         u.volume = 0;
         speechSynthesis.speak(u);
-      } catch (e) {}
+      } catch {}
       TTS_READY = true;
     }
     window.addEventListener('touchstart', primeTTS, { once: true });
@@ -188,7 +187,6 @@
       if (!('serviceWorker' in navigator)) return;
       try {
         const reg = await navigator.serviceWorker.register('sw.js');
-        // banner de atualização
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing;
           nw.addEventListener('statechange', () => {
@@ -198,7 +196,7 @@
           });
         });
         navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
-      } catch (e) {}
+      } catch {}
     }
 
     function showUpdateBanner(onClick){
@@ -230,7 +228,6 @@
       }, { once: true });
     });
 
-    // Init
     registerSW();
   </script>
 </body>
