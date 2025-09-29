@@ -1,24 +1,22 @@
-// sw.js — minimal
-const CACHE_V = 'v7';                          // ↑ mude a cada deploy
+// sw.js — minimal para Leitor
+const CACHE_V = 'v7';                      // ↑ mude a cada deploy
 const STATIC   = `ep-static-${CACHE_V}`;
 const RUNTIME  = `ep-runtime-${CACHE_V}`;
 
 const PRECACHE = [
   './',
   './index.html',
-  './style.css?v=6',
+  './style.css?v=7',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
 
-// Instala: precache do essencial
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(STATIC).then(c => c.addAll(PRECACHE)));
   self.skipWaiting();
 });
 
-// Ativa: limpa caches antigos e assume controle
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
@@ -27,12 +25,10 @@ self.addEventListener('activate', e => {
   })());
 });
 
-// Mensagem opcional para atualização imediata
 self.addEventListener('message', e => {
   if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
-// Fetch: HTML = network-first; outros = SWR
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
