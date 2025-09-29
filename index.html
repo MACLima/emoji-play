@@ -32,11 +32,26 @@
     </div>
 
     <div class="tabs">
-      <button class="tab active" data-tab="galeria">Galeria Falante</button>
+      <button class="tab active" data-tab="leitor">Leitor</button>
+      <button class="tab" data-tab="galeria">Galeria Falante</button>
       <button class="tab" data-tab="desfile">Desfile Animado</button>
       <button class="tab" data-tab="historia">História com Emojis</button>
-      <button class="tab" data-tab="leitor">Leitor</button>
     </div>
+
+    <!-- Seção: LEITOR -->
+    <section id="leitor" class="card panel" hidden role="region" aria-label="Leitor de Texto">
+      <div class="controls">
+        <label style="flex:1; display:flex; flex-direction:column; gap:6px">
+          Texto para ler:
+          <textarea id="ttsText" class="input" rows="4" placeholder="Digite aqui..."></textarea>
+        </label>
+        <div style="display:flex; gap:8px;">
+          <button id="ttsPlay" class="button primary">▶️ Play</button>
+          <button id="ttsStop" class="button">⏹️ Parar</button>
+          <button id="ttsClear" class="button ghost">🧹 Limpar</button>
+        </div>
+      </div>
+    </section>
 
     <section id="galeria" class="card panel" role="region" aria-label="Galeria Falante">
       <div class="controls">
@@ -76,21 +91,6 @@
           <select id="catStory" class="select"></select>
         </label>
         <div id="picker" class="grid" style="margin-top:10px"></div>
-      </div>
-    </section>
-
-    <!-- Seção: LEITOR -->
-    <section id="leitor" class="card panel" hidden role="region" aria-label="Leitor de Texto">
-      <div class="controls">
-        <label style="flex:1; display:flex; flex-direction:column; gap:6px">
-          Texto para ler:
-          <textarea id="ttsText" class="input" rows="4" placeholder="Digite aqui..."></textarea>
-        </label>
-        <div style="display:flex; gap:8px;">
-          <button id="ttsPlay" class="button primary">▶️ Play</button>
-          <button id="ttsStop" class="button">⏹️ Parar</button>
-          <button id="ttsClear" class="button ghost">🧹 Limpar</button>
-        </div>
       </div>
     </section>
     
