@@ -59,6 +59,9 @@
     .story p { margin:.4rem 0 0; font-size: 15px }
 
     footer { opacity:.7; font-size: 12px; margin-top: 20px }
+
+    /* Leitor */
+    textarea.input { width:100%; resize:vertical; min-height:3.5em }
   </style>
 </head>
 <body>
@@ -85,6 +88,7 @@
       <button class="tab" data-tab="piano">Piano de Emojis</button>
       <button class="tab" data-tab="desfile">Desfile Animado</button>
       <button class="tab" data-tab="historia">História com Emojis</button>
+      <button class="tab" data-tab="leitor">Leitor</button> <!-- NOVO -->
     </div>
 
     <section id="galeria" class="card panel" role="region" aria-label="Galeria Falante">
@@ -135,6 +139,21 @@
       </div>
     </section>
 
+    <!-- NOVA SEÇÃO: LEITOR -->
+    <section id="leitor" class="card panel" hidden role="region" aria-label="Leitor de Texto">
+      <div class="controls" style="align-items:flex-end">
+        <label style="flex:1; display:flex; flex-direction:column; gap:6px">
+          Texto para ler:
+          <textarea id="ttsText" class="input" rows="4" placeholder="Digite aqui..."></textarea>
+        </label>
+        <div style="display:flex; gap:8px;">
+          <button id="ttsPlay" class="button primary">▶️ Play</button>
+          <button id="ttsStop" class="button">⏹️ Parar</button>
+          <button id="ttsClear" class="button ghost">🧹 Limpar</button>
+        </div>
+      </div>
+    </section>
+
     <footer>
       Feito com ❤️ para o Marco e seu filho. Suporta voz nativa do navegador (Chrome/Android, Safari/iOS e Edge).
     </footer>
@@ -160,92 +179,86 @@
       ]
     };
 
-    // ==== iOS/Safari TTS unlock + voice loader + fila ====
-
-    // Detecta iOS/Safari
-    const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    // ==== iOS/Safari TTS unlock + voice loader + FILA ====
+    const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    
+
     let TTS_READY = false;
     function primeTTS() {
       if (TTS_READY || !('speechSynthesis' in window)) return;
       try {
-        // iOS às vezes só “acorda” com uma fala vazia
         const u = new SpeechSynthesisUtterance('');
         u.volume = 0;
-        speechSynthesis.speakQueued(u);
+        speechSynthesis.speak(u); // CORRETO: usar speak(u)
       } catch (e) {}
       TTS_READY = true;
     }
-    // Desbloqueia no primeiro gesto
     window.addEventListener('touchstart', primeTTS, { once: true });
     window.addEventListener('click',      primeTTS, { once: true });
-    
-    // Carregar vozes (iOS retorna [] de início)
+
+    // vozes
     let VOICES = [];
-    function refreshVoices() { VOICES = speechSynthesis.getVoices(); }
+    function refreshVoices(){ VOICES = speechSynthesis.getVoices(); }
     speechSynthesis.addEventListener('voiceschanged', refreshVoices);
     refreshVoices();
-    
-    // Promessa que resolve quando as vozes aparecerem (ou timeout)
+
     function awaitVoices(timeoutMs = 1500) {
       return new Promise(resolve => {
         const start = Date.now();
         (function loop() {
           if (VOICES.length) return resolve(VOICES);
           if (Date.now() - start > timeoutMs) return resolve(VOICES);
-          // força um “tick” no iOS
           try { speechSynthesis.getVoices(); } catch {}
           setTimeout(loop, 100);
         })();
       });
     }
-    
-    // Fila simples para evitar sobreposição (iOS silencia quando fala demais ao mesmo tempo)
+
+    // FILA
     const queue = [];
     let speaking = false;
-    
-    async function speakQueued(text, opts={}) {
+
+    function speakQueued(text, opts={}) {
       if (!text) return;
       queue.push({ text, opts });
       processQueue();
     }
-    
+
     async function processQueue() {
       if (speaking || !queue.length) return;
-    
       speaking = true;
+
       const { text, opts } = queue.shift();
-    
-      // iOS precisa “acordar” e às vezes destrava se cancelar antes
       primeTTS();
       if (IS_IOS) { try { speechSynthesis.cancel(); } catch {} }
-    
+
       await awaitVoices();
-    
+
       const u = new SpeechSynthesisUtterance(text);
       u.lang  = opts.lang  || 'pt-BR';
-      u.rate  = opts.rate  ?? 1;
-      u.pitch = opts.pitch ?? 1;
-    
-      // Prioriza voz pt-BR se disponível (iOS costuma ter "Luciana", "Yara", etc.)
-      const br = VOICES.find(v => v.lang?.toLowerCase().startsWith('pt-br'));
-      if (br) u.voice = br;
-    
+      u.rate  = opts.rate  ?? parseFloat(document.getElementById('rate')?.value || 1);
+      u.pitch = opts.pitch ?? parseFloat(document.getElementById('pitch')?.value || 1);
+
+      // se usuário selecionou voz específica
+      const selName = document.getElementById('voice')?.value;
+      let chosen = VOICES.find(v => v.name === selName);
+      if (!chosen) {
+        const br = VOICES.find(v => v.lang?.toLowerCase().startsWith('pt-br'));
+        if (br) chosen = br;
+      }
+      if (chosen) { u.voice = chosen; u.lang = chosen.lang || u.lang; }
+
       u.onend = u.onerror = () => { speaking = false; processQueue(); };
-      // Pequeno atraso ajuda no Safari
-      setTimeout(() => speechSynthesis.speakQueued(u), IS_IOS ? 0 : 0);
+      setTimeout(() => speechSynthesis.speak(u), 0); // CORRETO: usar speak(u)
     }
-    
-    // helper para parar tudo (se tiver um botão “parar”)
+
     function stopSpeech() {
       try { speechSynthesis.cancel(); } catch {}
       queue.length = 0;
       speaking = false;
     }
 
-
-    // ======== Util: fala ========
+    // ======== Util: controles de voz ========
     const voiceSel = document.getElementById('voice');
     const rate = document.getElementById('rate');
     const pitch = document.getElementById('pitch');
@@ -269,17 +282,7 @@
     window.speechSynthesis.onvoiceschanged = loadVoices;
     if (speechSynthesis.getVoices().length) loadVoices();
 
-    function speak(text){
-      if (!text) return;
-      const u = new SpeechSynthesisUtterance(text);
-      const v = speechSynthesis.getVoices().find(v=>v.name===voiceSel.value) || null;
-      if (v) u.voice = v;
-      u.lang = (v && v.lang) || 'pt-BR';
-      u.rate = parseFloat(rate.value);
-      u.pitch = parseFloat(pitch.value);
-      speechSynthesis.speakQueued(u);
-    }
-    document.getElementById('stopAll').onclick = ()=> speechSynthesis.cancel();
+    document.getElementById('stopAll').onclick = stopSpeech;
 
     // ======== Tabs ========
     const tabs = document.querySelectorAll('.tab');
@@ -315,11 +318,7 @@
     document.getElementById('speakAll').onclick = ()=>{
       const cat = catSelect.value;
       (DATA[cat]||[]).forEach(([_, label], i)=>{
-        const u = new SpeechSynthesisUtterance(label);
-        const v = speechSynthesis.getVoices().find(v=>v.name===voiceSel.value) || null;
-        if (v) u.voice = v; u.lang = (v && v.lang) || 'pt-BR';
-        u.rate = parseFloat(rate.value); u.pitch = parseFloat(pitch.value);
-        setTimeout(()=> speechSynthesis.speakQueued(u), i*480);
+        setTimeout(()=> speakQueued(label), i*480);
       });
     };
 
@@ -408,6 +407,36 @@
       return templates[Math.floor(Math.random()*templates.length)];
     }
 
+    // ======== NOVO: Leitor ========
+    const ttsText  = document.getElementById('ttsText');
+    const ttsPlay  = document.getElementById('ttsPlay');
+    const ttsStop  = document.getElementById('ttsStop');
+    const ttsClear = document.getElementById('ttsClear');
+
+    function playText() {
+      const raw = (ttsText.value || '').trim();
+      if (!raw) return;
+
+      // lê por linhas (evita utterances enormes)
+      const parts = raw.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+      let i = 0;
+      (function step(){
+        if (i >= parts.length) return;
+        speakQueued(parts[i], { lang:'pt-BR' });
+        i++; setTimeout(step, 600);
+      })();
+    }
+    function stopAllSpeech() { stopSpeech(); }
+
+    ttsPlay .addEventListener('click', playText);
+    ttsStop .addEventListener('click', stopAllSpeech);
+    ttsClear.addEventListener('click', ()=>{ ttsText.value=''; stopAllSpeech(); });
+
+    // ======== Listeners de troca de categoria (corrigidos) ========
+    catSelect .addEventListener('change', renderGrid);
+    catMarquee.addEventListener('change', renderMarquee);
+    catStory  .addEventListener('change', renderPicker);
+
     // ======== PWA: SW + Instalação ========
     async function registerSW(){
       if ('serviceWorker' in navigator) {
@@ -430,9 +459,9 @@
     });
 
     function init(){
-      renderCatOptions(catSelect); catSelect.value = 'Carinhas'; renderGrid();
-      renderCatOptions(catMarquee); catMarquee.value = 'Animais'; renderMarquee();
-      renderCatOptions(catStory); catStory.value = 'Comidas'; renderPicker();
+      renderCatOptions(catSelect);  catSelect.value  = 'Carinhas'; renderGrid();
+      renderCatOptions(catMarquee); catMarquee.value = 'Animais';  renderMarquee();
+      renderCatOptions(catStory);   catStory.value   = 'Comidas';  renderPicker();
       renderPiano();
     }
 
