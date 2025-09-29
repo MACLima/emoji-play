@@ -2,426 +2,336 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
   <title>Emoji Play</title>
-  <meta name="theme-color" content="#0f172a"/>
-  <link rel="manifest" href="manifest.webmanifest"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Emoji Play"/>
-  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icons/icon-192.png" />
   <style>
-    :root {
-      --bg: #0f172a; /* slate-900 */
-      --panel: #111827; /* gray-900 */
-      --muted: #1f2937; /* gray-800 */
-      --txt: #e5e7eb;  /* gray-200 */
-      --accent: #22d3ee; /* cyan-400 */
-      --accent-2: #a78bfa; /* violet-400 */
+    :root{
+      --bg:#0b1020; --panel:#131a2c; --txt:#e7eefc; --muted:#9ab; --accent:#59f;
+      --btn:#2a365a; --btn2:#1e293b;
     }
-    * { box-sizing: border-box }
-    html, body { height: 100% }
-    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji","Segoe UI Emoji"; background: var(--bg); color: var(--txt); }
-    .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-    header { display:flex; gap: 12px; align-items:center; justify-content: space-between; flex-wrap: wrap; }
-    h1 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0; letter-spacing: .3px }
-    .badge { padding: 4px 10px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#0b1020; font-weight:700 }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.09); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
-    .tabs { display:flex; gap:8px; flex-wrap: wrap; margin-top: 12px }
-    .tab { background: var(--muted); color:#cbd5e1; border:1px solid rgba(255,255,255,.08); padding:10px 14px; border-radius:12px; cursor:pointer; transition:.2s; font-weight:600 }
-    .tab.active{ outline: 2px solid var(--accent); color:#0b1020; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-color: transparent }
-    .panel { padding: 14px; }
-
-    .controls { display:flex; gap:10px; flex-wrap: wrap; align-items:center; margin-bottom: 12px }
-    .select, .input, .button { appearance:none; border:1px solid rgba(255,255,255,.12); background:#0b1224; color:var(--txt); padding:10px 12px; border-radius:12px; font-size: 14px }
-    .button.primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#0b1020; font-weight: 800; border: none }
-    .button.ghost { background: transparent }
-
-    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px }
-    .emoji-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px; border-radius: 14px; background:#0c142a; border:1px solid rgba(255,255,255,.08); cursor:pointer; transition:.15s; user-select:none }
-    .emoji-btn:hover, .emoji-btn:focus { transform: translateY(-2px); outline: 2px solid var(--accent) }
-    .emoji { font-size: 34px; line-height: 1 }
-    .label { font-size: 12px; color:#cbd5e1; text-align:center }
-
-    .piano { display:grid; grid-template-columns: repeat(auto-fit, minmax(70px,1fr)); gap:8px }
-    .key { padding:16px; border-radius:16px; background:#0d1a34; border:1px solid rgba(255,255,255,.08); font-size: 28px; cursor:pointer; transition:.1s }
-    .key:active { transform: scale(.98) }
-    .kbd { display:inline-block; font-size:11px; opacity:.7; border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:2px 6px; margin-top:6px }
-
-    .marquee-wrap { position: relative; overflow:hidden; border-radius: 14px; border:1px solid rgba(255,255,255,.08); background:#0b1224; }
-    .marquee { display:flex; gap: 24px; align-items:center; padding: 14px; animation: slide var(--speed, 12s) linear infinite; }
-    .marquee:hover{ animation-play-state: paused }
-    .marquee .item { font-size: 40px; cursor:pointer }
-    @keyframes slide { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-
-    .story { display:flex; gap:10px; flex-wrap: wrap; align-items:center }
-    .story .slot { width:64px; height:64px; display:flex; align-items:center; justify-content:center; font-size: 36px; border-radius:12px; background:#0c142a; border:1px solid rgba(255,255,255,.08) }
-    .story p { margin:.4rem 0 0; font-size: 15px }
-
-    footer { opacity:.7; font-size: 12px; margin-top: 20px }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b1020,#0a0f22 60%);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{max-width:1100px;margin-inline:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+    header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+    h1{font-size:22px;margin:0;letter-spacing:.2px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{background:var(--btn);border:1px solid #31406b;color:var(--txt);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .tab[aria-selected="true"]{background:var(--accent);border-color:transparent;color:#021}
+    .panel{background:rgba(19,26,44,.6);backdrop-filter:saturate(120%) blur(10px);border:1px solid #223158;padding:14px;border-radius:14px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+    select,button{background:var(--btn2);border:1px solid #2f3f66;color:var(--txt);padding:8px 10px;border-radius:10px}
+    button:hover{filter:brightness(1.1)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px}
+    .emoji-btn{font-size:28px;background:#111a2b;border:1px solid #223158;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+    .emoji-btn span{font-size:12px;color:var(--muted)}
+    .marquee{display:flex;gap:12px;overflow:auto;scrollbar-width:thin;padding:6px;border-radius:12px;background:#0f162a;border:1px solid #223158}
+    .story-slots{display:grid;grid-template-columns:repeat(4,minmax(60px,1fr));gap:8px;margin-top:8px}
+    .slot{height:64px;display:flex;align-items:center;justify-content:center;font-size:32px;background:#111a2b;border:1px dashed #325; border-radius:12px;cursor:pointer}
+    .banner{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;z-index:9999}
+    .hidden{display:none !important}
+    footer{opacity:.6;text-align:center;font-size:12px}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <header>
-      <h1>Emoji Play <span class="badge">PWA</span></h1>
-      <div class="controls card" style="padding:8px 10px">
-        <label>Voz:
-          <select id="voice" class="select"></select>
-        </label>
-        <label>Velocidade <input id="rate" class="input" type="range" min="0.5" max="1.4" step="0.1" value="1"/></label>
-        <label>Tom <input id="pitch" class="input" type="range" min="0.7" max="1.3" step="0.1" value="1"/></label>
-        <button id="stopAll" class="button">Parar fala</button>
-      </div>
+      <h1>Emoji Play</h1>
+      <nav class="tabs" role="tablist" aria-label="Modos">
+        <button class="tab" role="tab" id="tab-galeria" aria-controls="panel-galeria" aria-selected="true">Galeria</button>
+        <button class="tab" role="tab" id="tab-desfile" aria-controls="panel-desfile" aria-selected="false">Desfile</button>
+        <button class="tab" role="tab" id="tab-historia" aria-controls="panel-historia" aria-selected="false">História</button>
+      </nav>
     </header>
 
-    <div class="controls" style="margin-top:8px; gap:8px">
-      <button id="installBtn" class="button primary" disabled>Instalar no aparelho</button>
-      <span style="opacity:.7; font-size:12px">Para instalar, abra via HTTPS ou em <strong>localhost</strong>.</span>
-    </div>
-
-    <div class="tabs">
-      <button class="tab active" data-tab="galeria">Galeria Falante</button>
-      <button class="tab" data-tab="piano">Piano de Emojis</button>
-      <button class="tab" data-tab="desfile">Desfile Animado</button>
-      <button class="tab" data-tab="historia">História com Emojis</button>
-    </div>
-
-    <section id="galeria" class="card panel" role="region" aria-label="Galeria Falante">
+    <!-- Galeria -->
+    <section class="panel" role="tabpanel" id="panel-galeria" aria-labelledby="tab-galeria">
       <div class="controls">
-        <label>Categoria
-          <select id="catSelect" class="select"></select>
+        <label>Categoria:
+          <select id="catSelect"></select>
         </label>
-        <button id="speakAll" class="button primary">Falar todos</button>
+        <button id="speakAll">Falar todos</button>
       </div>
       <div id="grid" class="grid" aria-live="polite"></div>
     </section>
 
-    <section id="piano" class="card panel" hidden role="region" aria-label="Piano de Emojis">
+    <!-- Desfile -->
+    <section class="panel hidden" role="tabpanel" id="panel-desfile" aria-labelledby="tab-desfile">
       <div class="controls">
-        <span>Use o mouse ou as teclas (Q W E R T Y U I O P)</span>
+        <label>Categoria:
+          <select id="catMarquee"></select>
+        </label>
+        <label>Velocidade:
+          <select id="speed">
+            <option value="800">Lento</option>
+            <option value="450" selected>Médio</option>
+            <option value="250">Rápido</option>
+          </select>
+        </label>
       </div>
-      <div id="pianoKeys" class="piano"></div>
+      <div id="marquee" class="marquee" aria-live="polite"></div>
     </section>
 
-    <section id="desfile" class="card panel" hidden role="region" aria-label="Desfile Animado">
+    <!-- História -->
+    <section class="panel hidden" role="tabpanel" id="panel-historia" aria-labelledby="tab-historia">
       <div class="controls">
-        <label>Categoria
-          <select id="catMarquee" class="select"></select>
+        <label>Categoria:
+          <select id="catStory"></select>
         </label>
-        <label>Velocidade
-          <input id="speed" class="input" type="range" min="6" max="20" step="1" value="12"/>
-        </label>
-        <button id="pause" class="button">Pausar/Retomar</button>
+        <button id="tell">Contar história</button>
       </div>
-      <div class="marquee-wrap">
-        <div id="marquee" class="marquee"></div>
-      </div>
+      <div class="story-slots" id="slots"></div>
+      <p id="storyText" style="margin-top:10px;color:var(--muted)"></p>
     </section>
 
-    <section id="historia" class="card panel" hidden role="region" aria-label="História com Emojis">
-      <div class="story">
-        <div class="slot" id="slot1" data-slot="1">⬜️</div>
-        <div class="slot" id="slot2" data-slot="2">⬜️</div>
-        <div class="slot" id="slot3" data-slot="3">⬜️</div>
-        <button id="gen" class="button primary">Gerar história</button>
-      </div>
-      <p id="storyText"></p>
-      <div style="margin-top:12px">
-        <label>Categoria
-          <select id="catStory" class="select"></select>
-        </label>
-        <div id="picker" class="grid" style="margin-top:10px"></div>
-      </div>
-    </section>
-
-    <footer>
-      Feito com ❤️ para o Marco e seu filho. Suporta voz nativa do navegador (Chrome/Android, Safari/iOS e Edge).
-    </footer>
+    <footer>Funciona offline. Toque nos emojis para ouvir o nome.</footer>
   </div>
 
   <script>
-    // ======== Dados: categorias com emojis + nomes PT-BR ========
-    const DATA = {
-      "Carinhas": [
-        ["😀","rosto sorridente"],["😁","sorriso largo"],["😂","rindo com lágrimas"],["🤣","rolando de rir"],["😊","sorriso tímido"],["😇","anjo"],["😉","piscadinha"],["😍","apaixonado"],["😘","beijo"],["😜","linguinha"],["🤔","pensativo"],["🤗","abraço"],["😴","com sono"],["😎","óculos de sol"],["😭","chorando"],["😡","bravo"],["🤩","olhos de estrela"],["🥳","festa"],["😱","assustado"],["😺","gato feliz"]
-      ],
-      "Animais": [
-        ["🐶","cachorro"],["🐱","gato"],["🦊","raposa"],["🐻","urso"],["🐼","panda"],["🐨","coala"],["🐯","tigre"],["🦁","leão"],["🐮","vaca"],["🐷","porquinho"],["🐵","macaco"],["🐸","sapo"],["🐔","galinha"],["🐧","pinguim"],["🐦","passarinho"],["🐤","pintinho"],["🐴","cavalo"],["🦄","unicórnio"],["🐙","polvo"],["🦕","dinossauro"]
-      ],
-      "Comidas": [
-        ["🍎","maçã"],["🍌","banana"],["🍉","melancia"],["🍇","uvas"],["🍓","morango"],["🍍","abacaxi"],["🥕","cenoura"],["🌽","milho"],["🍔","hambúrguer"],["🍟","batata frita"],["🍕","pizza"],["🌭","cachorro-quente"],["🍰","bolo"],["🍪","biscoito"],["🍫","chocolate"],["🍿","pipoca"],["🍩","rosquinha"],["🍨","sorvete"],["🧃","suco"],["🥤","refrigerante"]
-      ],
-      "Objetos": [
-        ["⚽","bola de futebol"],["🏀","bola de basquete"],["🧩","quebra-cabeça"],["🚗","carro"],["🚓","carro de polícia"],["✈️","avião"],["🚀","foguete"],["⏰","despertador"],["🎈","bexiga"],["🎁","presente"],["🎲","dado"],["🧸","ursinho"],["🎸","guitarra"],["🥁","bateria"],["🎹","teclado"],["💡","lâmpada"],["📱","celular"],["💻","computador"],["📚","livros"],["🖍️","giz de cera"]
-      ],
-      "Natureza": [
-        ["🌞","sol"],["🌙","lua"],["⭐","estrela"],["☁️","nuvem"],["🌧️","chuva"],["🌈","arco-íris"],["🔥","fogo"],["💧","gota d'água"],["🌊","onda"],["⛄","boneco de neve"],["🌳","árvore"],["🌼","flor"],["🍁","folha"],["🪵","madeira"],["🗻","montanha"],["🌍","planeta Terra"],["⚡","raio"],["❄️","neve"],["🌪️","tornado"],["🌋","vulcão"]
-      ]
-    };
-
-    // ======== Util: fala ========
-    const voiceSel = document.getElementById('voice');
-    const rate = document.getElementById('rate');
-    const pitch = document.getElementById('pitch');
-
-    function loadVoices() {
-      const voices = speechSynthesis.getVoices();
-      voiceSel.innerHTML = '';
-      const sorted = voices.sort((a,b)=>{
-        const aBR = /pt-BR|pt_BR|Portuguese \(Brazil\)/i.test(a.lang + ' ' + a.name);
-        const bBR = /pt-BR|pt_BR|Portuguese \(Brazil\)/i.test(b.lang + ' ' + b.name);
-        if (aBR && !bBR) return -1; if (!aBR && bBR) return 1; return a.lang.localeCompare(b.lang);
-      });
-      sorted.forEach((v)=>{
-        const opt = document.createElement('option');
-        opt.value = v.name; opt.textContent = `${v.name} — ${v.lang}`;
-        voiceSel.appendChild(opt);
-      });
-      const idx = [...voiceSel.options].findIndex(o=>/pt-BR|Portuguese \(Brazil\)/i.test(o.textContent));
-      if (idx>=0) voiceSel.selectedIndex = idx;
-    }
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    if (speechSynthesis.getVoices().length) loadVoices();
-
-    function speak(text){
-      console.log('🔊 Tentando falar:', text);
-      if (!text) return;
-      const u = new SpeechSynthesisUtterance(text);
-      const v = speechSynthesis.getVoices().find(v=>v.name===voiceSel.value) || null;
-      if (v) u.voice = v;
-      u.lang = (v && v.lang) || 'pt-BR';
-      u.rate = parseFloat(rate.value);
-      u.pitch = parseFloat(pitch.value);
-      speechSynthesis.speak(u);
-    }
-    document.getElementById('stopAll').onclick = ()=> speechSynthesis.cancel();
-
-    // ======== Tabs ========
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(t=>{
-      t.addEventListener('click', ()=>{
-        tabs.forEach(x=>x.classList.remove('active'));
-        t.classList.add('active');
-        const id = t.dataset.tab;
-        document.querySelectorAll('section.panel').forEach(p=> p.hidden = p.id!==id);
-      });
-    });
-
-    // ======== Galeria ========
-    const catSelect = document.getElementById('catSelect');
-    const grid = document.getElementById('grid');
-
-    function renderCatOptions(select){
-      select.innerHTML = '';
-      Object.keys(DATA).forEach(k=>{
-        const opt = document.createElement('option'); opt.value=k; opt.textContent=k; select.appendChild(opt);
-      });
-    }
-    function renderGrid(){
-      const cat = catSelect.value; grid.innerHTML='';
-      (DATA[cat]||[]).forEach(([emoji, label])=>{
-        const btn = document.createElement('button');
-        btn.className='emoji-btn'; btn.setAttribute('aria-label', label);
-        btn.innerHTML = `<div class="emoji">${emoji}</div><div class="label">${label}</div>`;
-        btn.addEventListener('click', ()=> speak(label));
-        grid.appendChild(btn);
-      });
-    }
-    document.getElementById('speakAll').onclick = ()=>{
-      const cat = catSelect.value;
-      (DATA[cat]||[]).forEach(([_, label], i)=>{
-        const u = new SpeechSynthesisUtterance(label);
-        const v = speechSynthesis.getVoices().find(v=>v.name===voiceSel.value) || null;
-        if (v) u.voice = v; u.lang = (v && v.lang) || 'pt-BR';
-        u.rate = parseFloat(rate.value); u.pitch = parseFloat(pitch.value);
-        setTimeout(()=> speechSynthesis.speak(u), i*480);
-      });
-    };
-
-    // ======== Piano ========
-    const PIANO_KEYS = 'QWERTYUIOP'.split('');
-    const pianoEl = document.getElementById('pianoKeys');
-    function renderPiano(){
-      pianoEl.innerHTML='';
-      const firstCat = Object.keys(DATA)[0];
-      const arr = (DATA[firstCat]||[]).slice(0, PIANO_KEYS.length);
-      arr.forEach(([emoji,label], idx)=>{
-        const key = PIANO_KEYS[idx];
-        const btn = document.createElement('button');
-        btn.className='key';
-        btn.innerHTML = `${emoji}<div class="kbd">${key}</div>`;
-        btn.addEventListener('click', ()=> speak(label));
-        btn.dataset.key = key;
-        btn.dataset.label = label;
-        pianoEl.appendChild(btn);
-      });
-    }
-    window.addEventListener('keydown', (e)=>{
-      const k = e.key.toUpperCase();
-      const btn = [...document.querySelectorAll('.key')].find(b=>b.dataset.key===k);
-      if (btn){ e.preventDefault(); speak(btn.dataset.label); btn.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:120}); }
-    });
-
-    // ======== Desfile ========
-    const marquee = document.getElementById('marquee');
-    const catMarquee = document.getElementById('catMarquee');
-    const speed = document.getElementById('speed');
-    const pauseBtn = document.getElementById('pause');
-    let paused = false;
-    function renderMarquee(){
-      marquee.innerHTML='';
-      const cat = catMarquee.value; const list = (DATA[cat]||[]);
-      const items = [...list, ...list];
-      items.forEach(([emoji,label])=>{
-        const span = document.createElement('span');
-        span.className='item'; span.textContent = emoji; span.title = label;
-        span.addEventListener('click', ()=> speak(label));
-        marquee.appendChild(span);
-      });
-      marquee.style.setProperty('--speed', speed.value+'s');
-    }
-    speed.addEventListener('input', ()=> marquee.style.setProperty('--speed', speed.value+'s'));
-    pauseBtn.addEventListener('click', ()=>{
-      paused = !paused; marquee.style.animationPlayState = paused? 'paused':'running';
-    });
-
-    // ======== História ========
-    const picker = document.getElementById('picker');
-    const catStory = document.getElementById('catStory');
-    const storyText = document.getElementById('storyText');
-    const slots = [document.getElementById('slot1'), document.getElementById('slot2'), document.getElementById('slot3')];
-    let activeSlotIndex = 0;
-
-    slots.forEach((s, idx)=>{
-      s.addEventListener('click', ()=>{ activeSlotIndex = idx; slots.forEach(x=>x.style.outline=''); s.style.outline = '2px solid var(--accent)'; });
-    });
-    function renderPicker(){
-      picker.innerHTML=''; const cat = catStory.value;
-      (DATA[cat]||[]).forEach(([emoji,label])=>{
-        const btn = document.createElement('button');
-        btn.className='emoji-btn'; btn.innerHTML = `<div class="emoji">${emoji}</div><div class="label">${label}</div>`;
-        btn.addEventListener('click', ()=>{
-          slots[activeSlotIndex].textContent = emoji;
-          slots[activeSlotIndex].dataset.label = label;
-        });
-        picker.appendChild(btn);
-      });
-    }
-    document.getElementById('gen').addEventListener('click', ()=>{
-      const l1 = slots[0].dataset.label, l2 = slots[1].dataset.label, l3 = slots[2].dataset.label;
-      const phrase = buildStory(l1,l2,l3);
-      storyText.textContent = phrase;
-      speak(phrase);
-    });
-    function buildStory(a,b,c){
-      const f = (x)=> x || 'algo';
-      const templates = [
-        `O ${f(a)} visitou o ${f(b)} e ficou ${f(c)}.`,
-        `Hoje tem ${f(a)}, depois ${f(b)}, e no final ${f(c)}!`,
-        `${f(a)} com ${f(b)} deixou todo mundo ${f(c)}.`,
-      ];
-      return templates[Math.floor(Math.random()*templates.length)];
-    }
-
-    // ======== PWA: SW + Instalação ========
-    async function registerSW(){
-      if ('serviceWorker' in navigator) {
-        try { await navigator.serviceWorker.register('sw.js'); } catch(e){}
-      }
-    }
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e)=>{
-      e.preventDefault();
-      deferredPrompt = e;
-      const btn = document.getElementById('installBtn');
-      btn.disabled = false;
-      btn.addEventListener('click', async ()=>{
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
-        if (choice.outcome==='accepted'){ btn.textContent='Instalado / em instalação'; btn.disabled=true; }
-        deferredPrompt = null;
-      }, { once: true });
-    });
-
-    function init(){
-      renderCatOptions(catSelect); catSelect.value = 'Carinhas'; renderGrid();
-      renderCatOptions(catMarquee); catMarquee.value = 'Animais'; renderMarquee();
-      renderCatOptions(catStory); catStory.value = 'Comidas'; renderPicker();
-      renderPiano();
-    }
-
-    // Atualiza a UI quando trocar de categoria
-    catSelect.addEventListener('change', renderGrid);
-    catMarquee.addEventListener('change', renderMarquee);
-    catStory.addEventListener('change', renderPicker);
-    
-    registerSW();
-    init();
-  </script>
-  <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    // Recarrega automaticamente quando o novo SW assume o controle
-    window.location.reload();
-  });
-
-  navigator.serviceWorker.getRegistration().then(reg => {
-    if (!reg) return;
-
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          showUpdateBanner(() => newWorker.postMessage({ type: 'SKIP_WAITING' }));
-        }
-      });
-    });
-  });
-}
-
-function showUpdateBanner(onClick) {
-  const banner = document.createElement('div');
-  banner.style.cssText = `
-    position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #111827;
-    color: white;
-    padding: 12px 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    font-family: sans-serif;
-    z-index: 9999;
-  `;
-
-  banner.innerHTML = `
-    <span>🔄 Nova versão disponível</span>
-    <button style="
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-    ">Atualizar</button>
-  `;
-
-  banner.querySelector('button').onclick = () => {
-    banner.remove();
-    onClick();
+  // =======================
+  //  DADOS (exemplo)
+  // =======================
+  // Substitua por seu DATA real, se já tiver.
+  const DATA = {
+    "Carinhas": [
+      ["😀","rosto sorridente"],
+      ["😁","sorriso largo"],
+      ["😂","rindo muito"],
+      ["😊","sorriso tímido"],
+      ["😎","descolado"]
+    ],
+    "Animais": [
+      ["🐶","cachorro"],
+      ["🐱","gato"],
+      ["🐵","macaco"],
+      ["🦊","raposa"],
+      ["🐼","panda"]
+    ],
+    "Comidas": [
+      ["🍎","maçã"],
+      ["🍌","banana"],
+      ["🍕","pizza"],
+      ["🍫","chocolate"],
+      ["🍦","sorvete"]
+    ]
   };
 
-  document.body.appendChild(banner);
-}
-</script>
+  // =======================
+  //  TABS (UI)
+  // =======================
+  const tabBtns = Array.from(document.querySelectorAll('.tab'));
+  const panels = {
+    'tab-galeria': document.getElementById('panel-galeria'),
+    'tab-desfile': document.getElementById('panel-desfile'),
+    'tab-historia': document.getElementById('panel-historia')
+  };
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>b.setAttribute('aria-selected', b===btn ? 'true' : 'false'));
+      Object.values(panels).forEach(p=>p.classList.add('hidden'));
+      panels[btn.id].classList.remove('hidden');
+    });
+  });
+
+  // =======================
+  //  TTS (desbloqueio + vozes + speak)
+  // =======================
+  let ttsReady = false;
+  function primeTTS(){
+    if (ttsReady) return;
+    try{
+      const u = new SpeechSynthesisUtterance('');
+      u.volume = 0;
+      speechSynthesis.speak(u);
+    }catch(e){}
+    ttsReady = true;
+  }
+  window.addEventListener('touchstart', primeTTS, { once:true });
+  window.addEventListener('click',      primeTTS, { once:true });
+
+  let VOICES = [];
+  function refreshVoices(){ VOICES = speechSynthesis.getVoices(); }
+  speechSynthesis.addEventListener('voiceschanged', refreshVoices);
+  refreshVoices();
+
+  function speak(text, opts = {}){
+    if (!text) return;
+    if (!ttsReady) primeTTS();
+
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = opts.lang || 'pt-BR';
+    u.rate = opts.rate ?? 1;
+    u.pitch = opts.pitch ?? 1;
+
+    const br = VOICES.find(v => v.lang?.toLowerCase().startsWith('pt-br'));
+    if (br) u.voice = br;
+
+    speechSynthesis.speak(u);
+  }
+
+  // =======================
+  //  ELEMENTOS
+  // =======================
+  const catSelect  = document.getElementById('catSelect');
+  const catMarquee = document.getElementById('catMarquee');
+  const catStory   = document.getElementById('catStory');
+  const grid       = document.getElementById('grid');
+  const marquee    = document.getElementById('marquee');
+  const speedSel   = document.getElementById('speed');
+  const tellBtn    = document.getElementById('tell');
+  const storyText  = document.getElementById('storyText');
+  const slotsWrap  = document.getElementById('slots');
+  const speakAll   = document.getElementById('speakAll');
+
+  // =======================
+  //  HELPERS DE RENDER
+  // =======================
+  function fillCategories(){
+    const cats = Object.keys(DATA);
+    [catSelect, catMarquee, catStory].forEach(sel=>{
+      sel.innerHTML = '';
+      for(const c of cats){
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        sel.appendChild(opt);
+      }
+    });
+  }
+
+  function renderGrid(){
+    const cat = catSelect.value;
+    const list = DATA[cat] || [];
+    grid.innerHTML = '';
+    for(const [emoji, label] of list){
+      const b = document.createElement('button');
+      b.className = 'emoji-btn';
+      b.setAttribute('aria-label', label);
+      b.innerHTML = `<div style="font-size:34px">${emoji}</div><span>${label}</span>`;
+      b.addEventListener('click', ()=> speak(label));
+      grid.appendChild(b);
+    }
+  }
+
+  function renderMarquee(){
+    const cat = catMarquee.value;
+    const list = DATA[cat] || [];
+    marquee.innerHTML = '';
+    for(const [emoji, label] of list){
+      const b = document.createElement('button');
+      b.className = 'emoji-btn';
+      b.style.minWidth = '90px';
+      b.innerHTML = `<div style="font-size:34px">${emoji}</div><span>${label}</span>`;
+      b.addEventListener('click', ()=> speak(label));
+      marquee.appendChild(b);
+    }
+  }
+
+  function renderPicker(){
+    const cat = catStory.value;
+    const list = DATA[cat] || [];
+    slotsWrap.innerHTML = '';
+    for(let i=0;i<4;i++){
+      const s = document.createElement('button');
+      s.className = 'slot'; s.textContent = '➕';
+      s.title = 'Escolher emoji';
+      s.addEventListener('click', ()=>{
+        // simples: alterna entre emojis da categoria
+        const item = list[(Date.now()+i)%Math.max(1,list.length)];
+        s.textContent = item ? item[0] : '➕';
+        s.dataset.label = item ? item[1] : '';
+        speak(item ? item[1] : 'vazio');
+      });
+      slotsWrap.appendChild(s);
+    }
+    storyText.textContent = '';
+  }
+
+  // =======================
+  //  EVENTOS (selects + botões)
+  // =======================
+  catSelect .addEventListener('change', renderGrid);
+  catMarquee.addEventListener('change', renderMarquee);
+  catStory  .addEventListener('change', renderPicker);
+
+  speakAll.addEventListener('click', ()=>{
+    const cat = catSelect.value;
+    const list = DATA[cat] || [];
+    // fala cada item com pequeno intervalo
+    let i=0;
+    const step=()=>{
+      if(i>=list.length) return;
+      speak(list[i][1]);
+      i++; setTimeout(step, 550);
+    };
+    step();
+  });
+
+  tellBtn.addEventListener('click', ()=>{
+    const chosen = Array.from(slotsWrap.children).map(s=>[s.textContent, s.dataset.label||''].map(v=>v||''));
+    const labels = chosen.map(([,lbl])=>lbl).filter(Boolean);
+    if(!labels.length){ storyText.textContent = 'Escolha alguns emojis para criar a história.'; return; }
+    const sentence = makeSentence(labels);
+    storyText.textContent = sentence;
+    speak(sentence, { rate: 1 });
+  });
+
+  function makeSentence(labels){
+    // modelo bem simples; personalize à vontade
+    if(labels.length===1) return `${labels[0]}!`;
+    if(labels.length===2) return `${labels[0]} e ${labels[1]}!`;
+    return `${labels.slice(0,-1).join(', ')} e ${labels.at(-1)}!`;
+  }
+
+  // =======================
+  //  INIT
+  // =======================
+  function init(){
+    fillCategories();
+    // Seleciona primeira categoria por padrão
+    [catSelect,catMarquee,catStory].forEach(sel=>{
+      if(sel.options.length) sel.selectedIndex = 0;
+    });
+    renderGrid();
+    renderMarquee();
+    renderPicker();
+  }
+
+  // =======================
+  //  SW + Banner de atualização
+  // =======================
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+
+    // Banner de “Nova versão disponível”
+    navigator.serviceWorker.getRegistration().then(reg=>{
+      if(!reg) return;
+      reg.addEventListener('updatefound', ()=>{
+        const nw = reg.installing;
+        nw.addEventListener('statechange', ()=>{
+          if(nw.state==='installed' && navigator.serviceWorker.controller){
+            showUpdateBanner(()=> nw.postMessage({ type:'SKIP_WAITING' }));
+          }
+        });
+      });
+    });
+
+    // Recarrega quando o SW novo assume o controle
+    navigator.serviceWorker.addEventListener('controllerchange', ()=> location.reload());
+  }
+
+  function showUpdateBanner(onClick){
+    const b = document.createElement('div'); b.className='banner';
+    b.innerHTML = `<span>🔄 Nova versão disponível</span>
+      <button style="background:#2563eb;border:0;color:#fff;padding:6px 12px;border-radius:8px;font-weight:600;cursor:pointer">Atualizar</button>`;
+    b.querySelector('button').onclick = ()=>{ b.remove(); onClick(); };
+    document.body.appendChild(b);
+  }
+
+  // Start
+  init();
+  </script>
 </body>
 </html>
