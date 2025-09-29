@@ -160,6 +160,91 @@
       ]
     };
 
+    // ==== iOS/Safari TTS unlock + voice loader + fila ====
+
+    // Detecta iOS/Safari
+    const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    let TTS_READY = false;
+    function primeTTS() {
+      if (TTS_READY || !('speechSynthesis' in window)) return;
+      try {
+        // iOS às vezes só “acorda” com uma fala vazia
+        const u = new SpeechSynthesisUtterance('');
+        u.volume = 0;
+        speechSynthesis.speakQueued(u);
+      } catch (e) {}
+      TTS_READY = true;
+    }
+    // Desbloqueia no primeiro gesto
+    window.addEventListener('touchstart', primeTTS, { once: true });
+    window.addEventListener('click',      primeTTS, { once: true });
+    
+    // Carregar vozes (iOS retorna [] de início)
+    let VOICES = [];
+    function refreshVoices() { VOICES = speechSynthesis.getVoices(); }
+    speechSynthesis.addEventListener('voiceschanged', refreshVoices);
+    refreshVoices();
+    
+    // Promessa que resolve quando as vozes aparecerem (ou timeout)
+    function awaitVoices(timeoutMs = 1500) {
+      return new Promise(resolve => {
+        const start = Date.now();
+        (function loop() {
+          if (VOICES.length) return resolve(VOICES);
+          if (Date.now() - start > timeoutMs) return resolve(VOICES);
+          // força um “tick” no iOS
+          try { speechSynthesis.getVoices(); } catch {}
+          setTimeout(loop, 100);
+        })();
+      });
+    }
+    
+    // Fila simples para evitar sobreposição (iOS silencia quando fala demais ao mesmo tempo)
+    const queue = [];
+    let speaking = false;
+    
+    async function speakQueued(text, opts={}) {
+      if (!text) return;
+      queue.push({ text, opts });
+      processQueue();
+    }
+    
+    async function processQueue() {
+      if (speaking || !queue.length) return;
+    
+      speaking = true;
+      const { text, opts } = queue.shift();
+    
+      // iOS precisa “acordar” e às vezes destrava se cancelar antes
+      primeTTS();
+      if (IS_IOS) { try { speechSynthesis.cancel(); } catch {} }
+    
+      await awaitVoices();
+    
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang  = opts.lang  || 'pt-BR';
+      u.rate  = opts.rate  ?? 1;
+      u.pitch = opts.pitch ?? 1;
+    
+      // Prioriza voz pt-BR se disponível (iOS costuma ter "Luciana", "Yara", etc.)
+      const br = VOICES.find(v => v.lang?.toLowerCase().startsWith('pt-br'));
+      if (br) u.voice = br;
+    
+      u.onend = u.onerror = () => { speaking = false; processQueue(); };
+      // Pequeno atraso ajuda no Safari
+      setTimeout(() => speechSynthesis.speakQueued(u), IS_IOS ? 0 : 0);
+    }
+    
+    // helper para parar tudo (se tiver um botão “parar”)
+    function stopSpeech() {
+      try { speechSynthesis.cancel(); } catch {}
+      queue.length = 0;
+      speaking = false;
+    }
+
+
     // ======== Util: fala ========
     const voiceSel = document.getElementById('voice');
     const rate = document.getElementById('rate');
@@ -192,7 +277,7 @@
       u.lang = (v && v.lang) || 'pt-BR';
       u.rate = parseFloat(rate.value);
       u.pitch = parseFloat(pitch.value);
-      speechSynthesis.speak(u);
+      speechSynthesis.speakQueued(u);
     }
     document.getElementById('stopAll').onclick = ()=> speechSynthesis.cancel();
 
@@ -223,7 +308,7 @@
         const btn = document.createElement('button');
         btn.className='emoji-btn'; btn.setAttribute('aria-label', label);
         btn.innerHTML = `<div class="emoji">${emoji}</div><div class="label">${label}</div>`;
-        btn.addEventListener('click', ()=> speak(label));
+        btn.addEventListener('click', ()=> speakQueued(label));
         grid.appendChild(btn);
       });
     }
@@ -234,7 +319,7 @@
         const v = speechSynthesis.getVoices().find(v=>v.name===voiceSel.value) || null;
         if (v) u.voice = v; u.lang = (v && v.lang) || 'pt-BR';
         u.rate = parseFloat(rate.value); u.pitch = parseFloat(pitch.value);
-        setTimeout(()=> speechSynthesis.speak(u), i*480);
+        setTimeout(()=> speechSynthesis.speakQueued(u), i*480);
       });
     };
 
@@ -250,7 +335,7 @@
         const btn = document.createElement('button');
         btn.className='key';
         btn.innerHTML = `${emoji}<div class="kbd">${key}</div>`;
-        btn.addEventListener('click', ()=> speak(label));
+        btn.addEventListener('click', ()=> speakQueued(label));
         btn.dataset.key = key;
         btn.dataset.label = label;
         pianoEl.appendChild(btn);
@@ -259,7 +344,7 @@
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toUpperCase();
       const btn = [...document.querySelectorAll('.key')].find(b=>b.dataset.key===k);
-      if (btn){ e.preventDefault(); speak(btn.dataset.label); btn.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:120}); }
+      if (btn){ e.preventDefault(); speakQueued(btn.dataset.label); btn.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:120}); }
     });
 
     // ======== Desfile ========
@@ -275,7 +360,7 @@
       items.forEach(([emoji,label])=>{
         const span = document.createElement('span');
         span.className='item'; span.textContent = emoji; span.title = label;
-        span.addEventListener('click', ()=> speak(label));
+        span.addEventListener('click', ()=> speakQueued(label));
         marquee.appendChild(span);
       });
       marquee.style.setProperty('--speed', speed.value+'s');
@@ -311,7 +396,7 @@
       const l1 = slots[0].dataset.label, l2 = slots[1].dataset.label, l3 = slots[2].dataset.label;
       const phrase = buildStory(l1,l2,l3);
       storyText.textContent = phrase;
-      speak(phrase);
+      speakQueued(phrase);
     });
     function buildStory(a,b,c){
       const f = (x)=> x || 'algo';
