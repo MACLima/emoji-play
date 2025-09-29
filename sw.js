@@ -1,5 +1,5 @@
 // sw.js — Emoji Play (versão completa)
-const VERSION = 'v5'; // ↑ aumente a cada deploy para forçar atualização
+const VERSION = 'v5.1'; // ↑ aumente a cada deploy para forçar atualização
 const CACHE = `emoji-play-${VERSION}`;
 
 // Liste aqui o essencial para abrir offline (HTML, manifest, ícones e bundles principais)
