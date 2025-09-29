@@ -57,6 +57,25 @@
 
     /* Leitor */
     textarea.input { width:100%; resize:vertical; min-height:3.5em }
+
+    /* Flex mais resiliente: filhos podem encolher */
+    .controls > * { min-width: 0; }
+    
+    /* Leitor: melhor comportamento base */
+    #leitor .controls { align-items: stretch; }
+    
+    /* Mobile: empilha textarea e botões, botões 100% */
+    @media (max-width: 640px) {
+      #leitor .controls {
+        flex-direction: column;
+        gap: 12px;
+      }
+      #leitor .controls > label { width: 100%; }
+      #leitor .controls > div { width: 100%; display: flex; gap: 8px; }
+      #leitor .controls > div > .button { flex: 1; }
+      /* Deixe o textarea um pouco mais alto no mobile */
+      #leitor textarea.input { min-height: 6.5em; }
+    }
   </style>
 </head>
 <body>
@@ -128,7 +147,7 @@
 
     <!-- Seção: LEITOR -->
     <section id="leitor" class="card panel" hidden role="region" aria-label="Leitor de Texto">
-      <div class="controls" style="align-items:flex-end">
+      <div class="controls">
         <label style="flex:1; display:flex; flex-direction:column; gap:6px">
           Texto para ler:
           <textarea id="ttsText" class="input" rows="4" placeholder="Digite aqui..."></textarea>
@@ -140,7 +159,7 @@
         </div>
       </div>
     </section>
-
+    
     <footer>
       Feito com ❤️ para o Marco e seu filho. Suporta voz nativa do navegador (Chrome/Android, Safari/iOS e Edge).
     </footer>
