@@ -10,7 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Emoji Play"/>
   <link rel="apple-touch-icon" href="icons/icon-192.png"/>
-  <link href="style.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=6">
+  <meta name="description" content="Brinque com emojis e escute os nomes em voz alta. PWA com modo offline.">
 </head>
 <body>
   <div class="container">
@@ -20,45 +21,30 @@
         <label>Voz:
           <select id="voice" class="select"></select>
         </label>
-        <label>Velocidade <input id="rate" class="input" type="range" min="0.5" max="1.4" step="0.1" value="1"/></label>
-        <label>Tom <input id="pitch" class="input" type="range" min="0.7" max="1.3" step="0.1" value="1"/></label>
-        <button id="stopAll" class="button">Parar fala</button>
+        <label>Velocidade <input id="rate" class="input" type="range" min="0.5" max="1.4" step="0.1" value="1"></label>
+        <label>Tom <input id="pitch" class="input" type="range" min="0.7" max="1.3" step="0.1" value="1"></label>
+        <button type="button" id="stopAll" class="button">Parar fala</button>
       </div>
     </header>
 
     <div class="controls" style="margin-top:8px; gap:8px">
-      <button id="installBtn" class="button primary" disabled>Instalar no aparelho</button>
+      <button type="button" id="installBtn" class="button primary" disabled>Instalar no aparelho</button>
       <span style="opacity:.7; font-size:12px">Para instalar, abra via HTTPS ou em <strong>localhost</strong>.</span>
     </div>
 
     <div class="tabs">
-      <button class="tab active" data-tab="leitor">Leitor</button>
-      <button class="tab" data-tab="galeria">Galeria Falante</button>
-      <button class="tab" data-tab="desfile">Desfile Animado</button>
-      <button class="tab" data-tab="historia">História com Emojis</button>
+      <button type="button" class="tab active" data-tab="galeria">Galeria Falante</button>
+      <button type="button" class="tab" data-tab="desfile">Desfile Animado</button>
+      <button type="button" class="tab" data-tab="historia">História com Emojis</button>
+      <button type="button" class="tab" data-tab="leitor">Leitor</button>
     </div>
-
-    <!-- Seção: LEITOR -->
-    <section id="leitor" class="card panel" hidden role="region" aria-label="Leitor de Texto">
-      <div class="controls">
-        <label style="flex:1; display:flex; flex-direction:column; gap:6px">
-          Texto para ler:
-          <textarea id="ttsText" class="input" rows="4" placeholder="Digite aqui..."></textarea>
-        </label>
-        <div style="display:flex; gap:8px;">
-          <button id="ttsPlay" class="button primary">▶️ Play</button>
-          <button id="ttsStop" class="button">⏹️ Parar</button>
-          <button id="ttsClear" class="button ghost">🧹 Limpar</button>
-        </div>
-      </div>
-    </section>
 
     <section id="galeria" class="card panel" role="region" aria-label="Galeria Falante">
       <div class="controls">
         <label>Categoria
           <select id="catSelect" class="select"></select>
         </label>
-        <button id="speakAll" class="button primary">Falar todos</button>
+        <button type="button" id="speakAll" class="button primary">Falar todos</button>
       </div>
       <div id="grid" class="grid" aria-live="polite"></div>
     </section>
@@ -69,9 +55,9 @@
           <select id="catMarquee" class="select"></select>
         </label>
         <label>Velocidade
-          <input id="speed" class="input" type="range" min="6" max="20" step="1" value="12"/>
+          <input id="speed" class="input" type="range" min="6" max="20" step="1" value="12">
         </label>
-        <button id="pause" class="button">Pausar/Retomar</button>
+        <button type="button" id="pause" class="button">Pausar/Retomar</button>
       </div>
       <div class="marquee-wrap">
         <div id="marquee" class="marquee"></div>
@@ -83,7 +69,7 @@
         <div class="slot" id="slot1" data-slot="1">⬜️</div>
         <div class="slot" id="slot2" data-slot="2">⬜️</div>
         <div class="slot" id="slot3" data-slot="3">⬜️</div>
-        <button id="gen" class="button primary">Gerar história</button>
+        <button type="button" id="gen" class="button primary">Gerar história</button>
       </div>
       <p id="storyText"></p>
       <div style="margin-top:12px">
@@ -93,7 +79,22 @@
         <div id="picker" class="grid" style="margin-top:10px"></div>
       </div>
     </section>
-    
+
+    <!-- Seção: LEITOR -->
+    <section id="leitor" class="card panel" hidden role="region" aria-label="Leitor de Texto">
+      <div class="controls">
+        <label style="flex:1; display:flex; flex-direction:column; gap:6px">
+          Texto para ler:
+          <textarea id="ttsText" class="input" rows="4" placeholder="Digite aqui..."></textarea>
+        </label>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="ttsPlay" class="button primary">▶️ Play</button>
+          <button type="button" id="ttsStop" class="button">⏹️ Parar</button>
+          <button type="button" id="ttsClear" class="button ghost">🧹 Limpar</button>
+        </div>
+      </div>
+    </section>
+
     <footer>
       Feito com ❤️ para o Marco e seu filho. Suporta voz nativa do navegador (Chrome/Android, Safari/iOS e Edge).
     </footer>
@@ -349,12 +350,38 @@
     catMarquee.addEventListener('change', renderMarquee);
     catStory  .addEventListener('change', renderPicker);
 
-    // ======== PWA: SW + Instalação ========
+    // ======== PWA: SW + Instalação + Banner Update ========
     async function registerSW(){
-      if ('serviceWorker' in navigator) {
-        try { await navigator.serviceWorker.register('sw.js'); } catch(e){}
-      }
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        const reg = await navigator.serviceWorker.register('sw.js');
+        // banner de atualização
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              showUpdateBanner(() => reg.waiting?.postMessage('SKIP_WAITING'));
+            }
+          });
+        });
+        navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+      } catch (e) {}
     }
+
+    function showUpdateBanner(onClick){
+      const b = document.createElement('div');
+      b.setAttribute('style', `
+        position:fixed; left:50%; transform:translateX(-50%); bottom:16px; z-index:9999;
+        background:#111827; color:#fff; padding:10px 14px; border-radius:10px;
+        box-shadow:0 8px 24px rgba(0,0,0,.3); display:flex; gap:10px; align-items:center;
+        font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      `);
+      b.innerHTML = `<span>🔄 Nova versão disponível</span>
+        <button type="button" class="button primary" style="padding:6px 12px;border:none">Atualizar</button>`;
+      b.querySelector('button').onclick = () => { onClick?.(); b.remove(); };
+      document.body.appendChild(b);
+    }
+
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e)=>{
       e.preventDefault();
