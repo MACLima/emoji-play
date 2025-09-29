@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Emoji Play</title>
+  <title>Emoji Play — Leitor</title>
   <meta name="theme-color" content="#0f172a"/>
   <link rel="manifest" href="manifest.webmanifest"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="Emoji Play"/>
   <link rel="apple-touch-icon" href="icons/icon-192.png"/>
   <link rel="stylesheet" href="style.css?v=6">
-  <meta name="description" content="Brinque com emojis e escute os nomes em voz alta. PWA com modo offline.">
+  <meta name="description" content="Leitor de texto com voz do sistema. PWA com suporte a iOS/Android.">
 </head>
 <body>
   <div class="container">
@@ -32,60 +32,12 @@
       <span style="opacity:.7; font-size:12px">Para instalar, abra via HTTPS ou em <strong>localhost</strong>.</span>
     </div>
 
-    <div class="tabs">
-      <button type="button" class="tab active" data-tab="galeria">Galeria Falante</button>
-      <button type="button" class="tab" data-tab="desfile">Desfile Animado</button>
-      <button type="button" class="tab" data-tab="historia">História com Emojis</button>
-      <button type="button" class="tab" data-tab="leitor">Leitor</button>
-    </div>
-
-    <section id="galeria" class="card panel" role="region" aria-label="Galeria Falante">
-      <div class="controls">
-        <label>Categoria
-          <select id="catSelect" class="select"></select>
-        </label>
-        <button type="button" id="speakAll" class="button primary">Falar todos</button>
-      </div>
-      <div id="grid" class="grid" aria-live="polite"></div>
-    </section>
-
-    <section id="desfile" class="card panel" hidden role="region" aria-label="Desfile Animado">
-      <div class="controls">
-        <label>Categoria
-          <select id="catMarquee" class="select"></select>
-        </label>
-        <label>Velocidade
-          <input id="speed" class="input" type="range" min="6" max="20" step="1" value="12">
-        </label>
-        <button type="button" id="pause" class="button">Pausar/Retomar</button>
-      </div>
-      <div class="marquee-wrap">
-        <div id="marquee" class="marquee"></div>
-      </div>
-    </section>
-
-    <section id="historia" class="card panel" hidden role="region" aria-label="História com Emojis">
-      <div class="story">
-        <div class="slot" id="slot1" data-slot="1">⬜️</div>
-        <div class="slot" id="slot2" data-slot="2">⬜️</div>
-        <div class="slot" id="slot3" data-slot="3">⬜️</div>
-        <button type="button" id="gen" class="button primary">Gerar história</button>
-      </div>
-      <p id="storyText"></p>
-      <div style="margin-top:12px">
-        <label>Categoria
-          <select id="catStory" class="select"></select>
-        </label>
-        <div id="picker" class="grid" style="margin-top:10px"></div>
-      </div>
-    </section>
-
-    <!-- Seção: LEITOR -->
-    <section id="leitor" class="card panel" hidden role="region" aria-label="Leitor de Texto">
+    <!-- ÚNICA seção: LEITOR -->
+    <section id="leitor" class="card panel" role="region" aria-label="Leitor de Texto">
       <div class="controls">
         <label style="flex:1; display:flex; flex-direction:column; gap:6px">
           Texto para ler:
-          <textarea id="ttsText" class="input" rows="4" placeholder="Digite aqui..."></textarea>
+          <textarea id="ttsText" class="input" rows="6" placeholder="Digite aqui... Uma linha por frase é uma boa."></textarea>
         </label>
         <div style="display:flex; gap:8px;">
           <button type="button" id="ttsPlay" class="button primary">▶️ Play</button>
@@ -93,6 +45,9 @@
           <button type="button" id="ttsClear" class="button ghost">🧹 Limpar</button>
         </div>
       </div>
+      <p style="opacity:.8; font-size:12px; margin:6px 2px 0">
+        Dica: separe frases por linhas — o leitor fala em sequência.
+      </p>
     </section>
 
     <footer>
@@ -101,25 +56,6 @@
   </div>
 
   <script>
-    // ======== Dados ========
-    const DATA = {
-      "Carinhas": [
-        ["😀","rosto sorridente"],["😁","sorriso largo"],["😂","rindo com lágrimas"],["🤣","rolando de rir"],["😊","sorriso tímido"],["😇","anjo"],["😉","piscadinha"],["😍","apaixonado"],["😘","beijo"],["😜","linguinha"],["🤔","pensativo"],["🤗","abraço"],["😴","com sono"],["😎","óculos de sol"],["😭","chorando"],["😡","bravo"],["🤩","olhos de estrela"],["🥳","festa"],["😱","assustado"],["😺","gato feliz"]
-      ],
-      "Animais": [
-        ["🐶","cachorro"],["🐱","gato"],["🦊","raposa"],["🐻","urso"],["🐼","panda"],["🐨","coala"],["🐯","tigre"],["🦁","leão"],["🐮","vaca"],["🐷","porquinho"],["🐵","macaco"],["🐸","sapo"],["🐔","galinha"],["🐧","pinguim"],["🐦","passarinho"],["🐤","pintinho"],["🐴","cavalo"],["🦄","unicórnio"],["🐙","polvo"],["🦕","dinossauro"]
-      ],
-      "Comidas": [
-        ["🍎","maçã"],["🍌","banana"],["🍉","melancia"],["🍇","uvas"],["🍓","morango"],["🍍","abacaxi"],["🥕","cenoura"],["🌽","milho"],["🍔","hambúrguer"],["🍟","batata frita"],["🍕","pizza"],["🌭","cachorro-quente"],["🍰","bolo"],["🍪","biscoito"],["🍫","chocolate"],["🍿","pipoca"],["🍩","rosquinha"],["🍨","sorvete"],["🧃","suco"],["🥤","refrigerante"]
-      ],
-      "Objetos": [
-        ["⚽","bola de futebol"],["🏀","bola de basquete"],["🧩","quebra-cabeça"],["🚗","carro"],["🚓","carro de polícia"],["✈️","avião"],["🚀","foguete"],["⏰","despertador"],["🎈","bexiga"],["🎁","presente"],["🎲","dado"],["🧸","ursinho"],["🎸","guitarra"],["🥁","bateria"],["🎹","teclado"],["💡","lâmpada"],["📱","celular"],["💻","computador"],["📚","livros"],["🖍️","giz de cera"]
-      ],
-      "Natureza": [
-        ["🌞","sol"],["🌙","lua"],["⭐","estrela"],["☁️","nuvem"],["🌧️","chuva"],["🌈","arco-íris"],["🔥","fogo"],["💧","gota d'água"],["🌊","onda"],["⛄","boneco de neve"],["🌳","árvore"],["🌼","flor"],["🍁","folha"],["🪵","madeira"],["🗻","montanha"],["🌍","planeta Terra"],["⚡","raio"],["❄️","neve"],["🌪️","tornado"],["🌋","vulcão"]
-      ]
-    };
-
     // ==== iOS/Safari TTS unlock + vozes + FILA ====
     const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -222,105 +158,6 @@
 
     document.getElementById('stopAll').onclick = stopSpeech;
 
-    // ======== Tabs ========
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(t=>{
-      t.addEventListener('click', ()=>{
-        tabs.forEach(x=>x.classList.remove('active'));
-        t.classList.add('active');
-        const id = t.dataset.tab;
-        document.querySelectorAll('section.panel').forEach(p=> p.hidden = p.id!==id);
-      });
-    });
-
-    // ======== Galeria ========
-    const catSelect = document.getElementById('catSelect');
-    const grid = document.getElementById('grid');
-
-    function renderCatOptions(select){
-      select.innerHTML = '';
-      Object.keys(DATA).forEach(k=>{
-        const opt = document.createElement('option'); opt.value=k; opt.textContent=k; select.appendChild(opt);
-      });
-    }
-    function renderGrid(){
-      const cat = catSelect.value; grid.innerHTML='';
-      (DATA[cat]||[]).forEach(([emoji, label])=>{
-        const btn = document.createElement('button');
-        btn.className='emoji-btn'; btn.setAttribute('aria-label', label);
-        btn.innerHTML = `<div class="emoji">${emoji}</div><div class="label">${label}</div>`;
-        btn.addEventListener('click', ()=> speakQueued(label));
-        grid.appendChild(btn);
-      });
-    }
-    document.getElementById('speakAll').onclick = ()=>{
-      const cat = catSelect.value;
-      (DATA[cat]||[]).forEach(([_, label], i)=>{
-        setTimeout(()=> speakQueued(label), i*480);
-      });
-    };
-
-    // ======== Desfile ========
-    const marquee = document.getElementById('marquee');
-    const catMarquee = document.getElementById('catMarquee');
-    const speed = document.getElementById('speed');
-    const pauseBtn = document.getElementById('pause');
-    let paused = false;
-    function renderMarquee(){
-      marquee.innerHTML='';
-      const cat = catMarquee.value; const list = (DATA[cat]||[]);
-      const items = [...list, ...list];
-      items.forEach(([emoji,label])=>{
-        const span = document.createElement('span');
-        span.className='item'; span.textContent = emoji; span.title = label;
-        span.addEventListener('click', ()=> speakQueued(label));
-        marquee.appendChild(span);
-      });
-      marquee.style.setProperty('--speed', speed.value+'s');
-    }
-    speed.addEventListener('input', ()=> marquee.style.setProperty('--speed', speed.value+'s'));
-    pauseBtn.addEventListener('click', ()=>{
-      paused = !paused; marquee.style.animationPlayState = paused? 'paused':'running';
-    });
-
-    // ======== História ========
-    const picker = document.getElementById('picker');
-    const catStory = document.getElementById('catStory');
-    const storyText = document.getElementById('storyText');
-    const slots = [document.getElementById('slot1'), document.getElementById('slot2'), document.getElementById('slot3')];
-    let activeSlotIndex = 0;
-
-    slots.forEach((s, idx)=>{
-      s.addEventListener('click', ()=>{ activeSlotIndex = idx; slots.forEach(x=>x.style.outline=''); s.style.outline = '2px solid var(--accent)'; });
-    });
-    function renderPicker(){
-      picker.innerHTML=''; const cat = catStory.value;
-      (DATA[cat]||[]).forEach(([emoji,label])=>{
-        const btn = document.createElement('button');
-        btn.className='emoji-btn'; btn.innerHTML = `<div class="emoji">${emoji}</div><div class="label">${label}</div>`;
-        btn.addEventListener('click', ()=>{
-          slots[activeSlotIndex].textContent = emoji;
-          slots[activeSlotIndex].dataset.label = label;
-        });
-        picker.appendChild(btn);
-      });
-    }
-    document.getElementById('gen').addEventListener('click', ()=>{
-      const l1 = slots[0].dataset.label, l2 = slots[1].dataset.label, l3 = slots[2].dataset.label;
-      const phrase = buildStory(l1,l2,l3);
-      storyText.textContent = phrase;
-      speakQueued(phrase);
-    });
-    function buildStory(a,b,c){
-      const f = (x)=> x || 'algo';
-      const templates = [
-        `O ${f(a)} visitou o ${f(b)} e ficou ${f(c)}.`,
-        `Hoje tem ${f(a)}, depois ${f(b)}, e no final ${f(c)}!`,
-        `${f(a)} com ${f(b)} deixou todo mundo ${f(c)}.`,
-      ];
-      return templates[Math.floor(Math.random()*templates.length)];
-    }
-
     // ======== Leitor ========
     const ttsText  = document.getElementById('ttsText');
     const ttsPlay  = document.getElementById('ttsPlay');
@@ -344,11 +181,6 @@
     ttsPlay .addEventListener('click', playText);
     ttsStop .addEventListener('click', stopAllSpeech);
     ttsClear.addEventListener('click', ()=>{ ttsText.value=''; stopAllSpeech(); });
-
-    // ======== Troca de categorias ========
-    catSelect .addEventListener('change', renderGrid);
-    catMarquee.addEventListener('change', renderMarquee);
-    catStory  .addEventListener('change', renderPicker);
 
     // ======== PWA: SW + Instalação + Banner Update ========
     async function registerSW(){
@@ -397,14 +229,8 @@
       }, { once: true });
     });
 
-    function init(){
-      renderCatOptions(catSelect);  catSelect.value  = 'Carinhas'; renderGrid();
-      renderCatOptions(catMarquee); catMarquee.value = 'Animais';  renderMarquee();
-      renderCatOptions(catStory);   catStory.value   = 'Comidas';  renderPicker();
-    }
-
+    // Init
     registerSW();
-    init();
   </script>
 </body>
 </html>
