@@ -1,0 +1,64 @@
+:root {
+  --bg: #0f172a; /* slate-900 */
+  --panel: #111827; /* gray-900 */
+  --muted: #1f2937; /* gray-800 */
+  --txt: #e5e7eb;  /* gray-200 */
+  --accent: #22d3ee; /* cyan-400 */
+  --accent-2: #a78bfa; /* violet-400 */
+}
+
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji","Segoe UI Emoji"; background: var(--bg); color: var(--txt); }
+.container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+header { display:flex; gap: 12px; align-items:center; justify-content: space-between; flex-wrap: wrap; }
+h1 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0; letter-spacing: .3px }
+.badge { padding: 4px 10px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#0b1020; font-weight:700 }
+.card { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.09); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.tabs { display:flex; gap:8px; flex-wrap: wrap; margin-top: 12px }
+.tab { background: var(--muted); color:#cbd5e1; border:1px solid rgba(255,255,255,.08); padding:10px 14px; border-radius:12px; cursor:pointer; transition:.2s; font-weight:600 }
+.tab.active{ outline: 2px solid var(--accent); color:#0b1020; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-color: transparent }
+.panel { padding: 14px; }
+
+.controls { display:flex; gap:10px; flex-wrap: wrap; align-items:center; margin-bottom: 12px }
+.select, .input, .button { appearance:none; border:1px solid rgba(255,255,255,.12); background:#0b1224; color:var(--txt); padding:10px 12px; border-radius:12px; font-size: 14px }
+.button.primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#0b1020; font-weight: 800; border: none }
+.button.ghost { background: transparent }
+
+.grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px }
+.emoji-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px; border-radius: 14px; background:#0c142a; border:1px solid rgba(255,255,255,.08); cursor:pointer; transition:.15s; user-select:none }
+.emoji-btn:hover, .emoji-btn:focus { transform: translateY(-2px); outline: 2px solid var(--accent) }
+.emoji { font-size: 34px; line-height: 1 }
+.label { font-size: 12px; color:#cbd5e1; text-align:center }
+
+.marquee-wrap { position: relative; overflow:hidden; border-radius: 14px; border:1px solid rgba(255,255,255,.08); background:#0b1224; }
+.marquee { display:flex; gap: 24px; align-items:center; padding: 14px; animation: slide var(--speed, 12s) linear infinite; }
+.marquee:hover{ animation-play-state: paused }
+.marquee .item { font-size: 40px; cursor:pointer }
+@keyframes slide { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+
+.story { display:flex; gap:10px; flex-wrap: wrap; align-items:center }
+.story .slot { width:64px; height:64px; display:flex; align-items:center; justify-content:center; font-size: 36px; border-radius:12px; background:#0c142a; border:1px solid rgba(255,255,255,.08) }
+.story p { margin:.4rem 0 0; font-size: 15px }
+
+footer { opacity:.7; font-size: 12px; margin-top: 20px }
+
+/* Leitor */
+textarea.input { width:100%; resize:vertical; min-height:3.5em }
+
+/* Flex mais resiliente: filhos podem encolher */
+.controls > * { min-width: 0; }
+
+/* Leitor: melhor comportamento base */
+#leitor .controls { align-items: stretch; }
+
+/* Mobile: empilha textarea e botões, botões 100% */
+#leitor .controls {
+  flex-direction: column;
+  gap: 12px;
+}
+#leitor .controls > label { width: 100%; }
+#leitor .controls > div { width: 100%; display: flex; gap: 8px; }
+#leitor .controls > div > .button { flex: 1; }
+/* Deixe o textarea um pouco mais alto no mobile */
+#leitor textarea.input { min-height: 6.5em; }
