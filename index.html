@@ -185,6 +185,7 @@
     if (speechSynthesis.getVoices().length) loadVoices();
 
     function speak(text){
+      console.log('🔊 Tentando falar:', text);
       if (!text) return;
       const u = new SpeechSynthesisUtterance(text);
       const v = speechSynthesis.getVoices().find(v=>v.name===voiceSel.value) || null;
