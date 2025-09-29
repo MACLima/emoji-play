@@ -1,162 +1,123 @@
 :root {
-  --bg: #0f172a;           /* slate-900 */
-  --panel: #111827;        /* gray-900 */
-  --muted: #1f2937;        /* gray-800 */
-  --txt: #e5e7eb;          /* gray-200 */
-  --accent: #22d3ee;       /* cyan-400 */
-  --accent-2: #a78bfa;     /* violet-400 */
-
-  --radius: 16px;
-  --shadow: 0 10px 30px rgba(0,0,0,.25);
+  --bg: #0f172a;        /* slate-900 */
+  --panel: #111827;     /* gray-900 */
+  --muted: #1f2937;     /* gray-800 */
+  --txt: #e5e7eb;       /* gray-200 */
+  --accent: #22d3ee;    /* cyan-400 */
+  --accent-2: #a78bfa;  /* violet-400 */
 }
 
 * { box-sizing: border-box }
 html, body { height: 100% }
-html { -webkit-text-size-adjust: 100%; } /* iOS: respeita o tamanho do texto */
 body {
-  margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   background: var(--bg);
   color: var(--txt);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 .container {
   max-width: 1100px;
   margin: 0 auto;
   padding: 16px;
-  padding-left: max(16px, env(safe-area-inset-left));
-  padding-right: max(16px, env(safe-area-inset-right));
 }
 
-header { display:flex; gap: 12px; align-items:center; justify-content: space-between; flex-wrap: wrap; }
-h1 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0; letter-spacing: .3px }
+header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+h1 {
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  margin: 0;
+  letter-spacing: .3px;
+}
 
 .badge {
   padding: 4px 10px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color:#0b1020; font-weight:700
+  color: #0b1020;
+  font-weight: 700;
 }
 
 .card {
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
   border: 1px solid rgba(255,255,255,0.09);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
 }
 
-.tabs { display:flex; gap:8px; flex-wrap: wrap; margin-top: 12px }
-.tab {
-  background: var(--muted);
-  color:#cbd5e1;
-  border:1px solid rgba(255,255,255,.08);
-  padding:10px 14px;
-  border-radius:12px;
-  cursor:pointer;
-  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-  font-weight:600;
-  touch-action: manipulation; /* melhora latência do toque */
-}
-.tab.active{
-  outline: 2px solid var(--accent);
-  color:#0b1020;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  border-color: transparent
-}
-.panel { padding: 14px; }
-
-/* Controles e inputs */
-.controls { display:flex; gap:10px; flex-wrap: wrap; align-items:center; margin-bottom: 12px }
-.controls > * { min-width: 0; } /* filhos podem encolher em flex */
-
-.select, .input, .button {
-  appearance:none;
-  -webkit-appearance: none; /* iOS */
-  border:1px solid rgba(255,255,255,.12);
-  background:#0b1224;
-  color:var(--txt);
-  padding:10px 12px;
-  border-radius:12px;
-  font-size: 16px; /* >=16px evita zoom automático no iOS */
-  line-height: 1.3;
+.panel {
+  padding: 14px;
 }
 
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.select,
+.input,
 .button {
-  cursor: pointer;
-  transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
-  touch-action: manipulation;
-}
-.button:active { transform: translateY(1px) scale(.99); }
-@media (pointer:fine) {
-  .button:hover { filter: brightness(1.05); }
-}
-.button.primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#0b1020; font-weight: 800; border: none }
-.button.ghost { background: transparent }
-
-/* Foco visível acessível (não “pisca” no toque mobile) */
-:focus { outline: none; }
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(34,211,238,.2);
+  appearance: none;
+  border: 1px solid rgba(255,255,255,.12);
+  background: #0b1224;
+  color: var(--txt);
+  padding: 10px 12px;
   border-radius: 12px;
+  font-size: 14px;
 }
 
-/* Grade de emojis */
-.grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px }
-.emoji-btn {
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-  padding:12px; border-radius: 14px; background:#0c142a; border:1px solid rgba(255,255,255,.08);
-  cursor:pointer; transition:.15s; user-select:none; touch-action: manipulation;
+.button.primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #0b1020;
+  font-weight: 800;
+  border: none;
 }
-.emoji-btn:hover, .emoji-btn:focus-visible { transform: translateY(-2px); outline: 2px solid var(--accent) }
-.emoji { font-size: 34px; line-height: 1 }
-.label { font-size: 12px; color:#cbd5e1; text-align:center }
 
-/* Desfile */
-.marquee-wrap { position: relative; overflow:hidden; border-radius: 14px; border:1px solid rgba(255,255,255,.08); background:#0b1224; }
-.marquee { display:flex; gap: 24px; align-items:center; padding: 14px; animation: slide var(--speed, 12s) linear infinite; }
-.marquee:hover{ animation-play-state: paused }
-.marquee .item { font-size: 40px; cursor:pointer; touch-action: manipulation; }
-@keyframes slide { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-
-/* História */
-.story { display:flex; gap:10px; flex-wrap: wrap; align-items:center }
-.story .slot {
-  width:64px; height:64px; display:flex; align-items:center; justify-content:center;
-  font-size: 36px; border-radius:12px; background:#0c142a; border:1px solid rgba(255,255,255,.08);
-  touch-action: manipulation;
+.button.ghost {
+  background: transparent;
 }
-.story p { margin:.4rem 0 0; font-size: 15px }
-
-/* Rodapé */
-footer { opacity:.7; font-size: 12px; margin-top: 20px; padding-bottom: env(safe-area-inset-bottom); }
 
 /* Leitor */
-textarea.input { width:100%; resize:vertical; min-height:3.5em }
-
-/* Leitor: melhor comportamento base */
-#leitor .controls { align-items: stretch; }
-
-/* Mobile: empilha textarea e botões, botões 100% */
-#leitor .controls { flex-direction: column; gap: 12px; }
-#leitor .controls > label { width: 100%; }
-#leitor .controls > div { width: 100%; display: flex; gap: 8px; }
-#leitor .controls > div > .button { flex: 1; }
-/* Deixe o textarea um pouco mais alto no mobile */
-#leitor textarea.input { min-height: 6.5em; }
-
-/* Acessibilidade: classe utilitária para esconder só visualmente */
-.visually-hidden {
-  position:absolute !important;
-  width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
-  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+textarea.input {
+  width: 100%;
+  resize: vertical;
+  min-height: 3.5em;
 }
 
-/* Respeita usuários que preferem menos movimento */
-@media (prefers-reduced-motion: reduce) {
-  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
-  .marquee { animation: none !important; }
+#leitor .controls {
+  flex-direction: column;
+  gap: 12px;
+}
+
+#leitor .controls > label {
+  width: 100%;
+}
+
+#leitor .controls > div {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+
+#leitor .controls > div > .button {
+  flex: 1;
+}
+
+#leitor textarea.input {
+  min-height: 6.5em;
+}
+
+footer {
+  opacity: .7;
+  font-size: 12px;
+  margin-top: 20px;
 }
