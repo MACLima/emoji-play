@@ -43,11 +43,6 @@
     .emoji { font-size: 34px; line-height: 1 }
     .label { font-size: 12px; color:#cbd5e1; text-align:center }
 
-    .piano { display:grid; grid-template-columns: repeat(auto-fit, minmax(70px,1fr)); gap:8px }
-    .key { padding:16px; border-radius:16px; background:#0d1a34; border:1px solid rgba(255,255,255,.08); font-size: 28px; cursor:pointer; transition:.1s }
-    .key:active { transform: scale(.98) }
-    .kbd { display:inline-block; font-size:11px; opacity:.7; border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:2px 6px; margin-top:6px }
-
     .marquee-wrap { position: relative; overflow:hidden; border-radius: 14px; border:1px solid rgba(255,255,255,.08); background:#0b1224; }
     .marquee { display:flex; gap: 24px; align-items:center; padding: 14px; animation: slide var(--speed, 12s) linear infinite; }
     .marquee:hover{ animation-play-state: paused }
@@ -85,10 +80,9 @@
 
     <div class="tabs">
       <button class="tab active" data-tab="galeria">Galeria Falante</button>
-      <button class="tab" data-tab="piano">Piano de Emojis</button>
       <button class="tab" data-tab="desfile">Desfile Animado</button>
       <button class="tab" data-tab="historia">História com Emojis</button>
-      <button class="tab" data-tab="leitor">Leitor</button> <!-- NOVO -->
+      <button class="tab" data-tab="leitor">Leitor</button>
     </div>
 
     <section id="galeria" class="card panel" role="region" aria-label="Galeria Falante">
@@ -99,13 +93,6 @@
         <button id="speakAll" class="button primary">Falar todos</button>
       </div>
       <div id="grid" class="grid" aria-live="polite"></div>
-    </section>
-
-    <section id="piano" class="card panel" hidden role="region" aria-label="Piano de Emojis">
-      <div class="controls">
-        <span>Use o mouse ou as teclas (Q W E R T Y U I O P)</span>
-      </div>
-      <div id="pianoKeys" class="piano"></div>
     </section>
 
     <section id="desfile" class="card panel" hidden role="region" aria-label="Desfile Animado">
@@ -139,7 +126,7 @@
       </div>
     </section>
 
-    <!-- NOVA SEÇÃO: LEITOR -->
+    <!-- Seção: LEITOR -->
     <section id="leitor" class="card panel" hidden role="region" aria-label="Leitor de Texto">
       <div class="controls" style="align-items:flex-end">
         <label style="flex:1; display:flex; flex-direction:column; gap:6px">
@@ -160,7 +147,7 @@
   </div>
 
   <script>
-    // ======== Dados: categorias com emojis + nomes PT-BR ========
+    // ======== Dados ========
     const DATA = {
       "Carinhas": [
         ["😀","rosto sorridente"],["😁","sorriso largo"],["😂","rindo com lágrimas"],["🤣","rolando de rir"],["😊","sorriso tímido"],["😇","anjo"],["😉","piscadinha"],["😍","apaixonado"],["😘","beijo"],["😜","linguinha"],["🤔","pensativo"],["🤗","abraço"],["😴","com sono"],["😎","óculos de sol"],["😭","chorando"],["😡","bravo"],["🤩","olhos de estrela"],["🥳","festa"],["😱","assustado"],["😺","gato feliz"]
@@ -179,7 +166,7 @@
       ]
     };
 
-    // ==== iOS/Safari TTS unlock + voice loader + FILA ====
+    // ==== iOS/Safari TTS unlock + vozes + FILA ====
     const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
@@ -189,14 +176,13 @@
       try {
         const u = new SpeechSynthesisUtterance('');
         u.volume = 0;
-        speechSynthesis.speak(u); // CORRETO: usar speak(u)
+        speechSynthesis.speak(u);
       } catch (e) {}
       TTS_READY = true;
     }
     window.addEventListener('touchstart', primeTTS, { once: true });
     window.addEventListener('click',      primeTTS, { once: true });
 
-    // vozes
     let VOICES = [];
     function refreshVoices(){ VOICES = speechSynthesis.getVoices(); }
     speechSynthesis.addEventListener('voiceschanged', refreshVoices);
@@ -214,7 +200,6 @@
       });
     }
 
-    // FILA
     const queue = [];
     let speaking = false;
 
@@ -239,7 +224,6 @@
       u.rate  = opts.rate  ?? parseFloat(document.getElementById('rate')?.value || 1);
       u.pitch = opts.pitch ?? parseFloat(document.getElementById('pitch')?.value || 1);
 
-      // se usuário selecionou voz específica
       const selName = document.getElementById('voice')?.value;
       let chosen = VOICES.find(v => v.name === selName);
       if (!chosen) {
@@ -249,7 +233,7 @@
       if (chosen) { u.voice = chosen; u.lang = chosen.lang || u.lang; }
 
       u.onend = u.onerror = () => { speaking = false; processQueue(); };
-      setTimeout(() => speechSynthesis.speak(u), 0); // CORRETO: usar speak(u)
+      setTimeout(() => speechSynthesis.speak(u), 0);
     }
 
     function stopSpeech() {
@@ -258,7 +242,7 @@
       speaking = false;
     }
 
-    // ======== Util: controles de voz ========
+    // ======== Controles de voz ========
     const voiceSel = document.getElementById('voice');
     const rate = document.getElementById('rate');
     const pitch = document.getElementById('pitch');
@@ -322,30 +306,6 @@
       });
     };
 
-    // ======== Piano ========
-    const PIANO_KEYS = 'QWERTYUIOP'.split('');
-    const pianoEl = document.getElementById('pianoKeys');
-    function renderPiano(){
-      pianoEl.innerHTML='';
-      const firstCat = Object.keys(DATA)[0];
-      const arr = (DATA[firstCat]||[]).slice(0, PIANO_KEYS.length);
-      arr.forEach(([emoji,label], idx)=>{
-        const key = PIANO_KEYS[idx];
-        const btn = document.createElement('button');
-        btn.className='key';
-        btn.innerHTML = `${emoji}<div class="kbd">${key}</div>`;
-        btn.addEventListener('click', ()=> speakQueued(label));
-        btn.dataset.key = key;
-        btn.dataset.label = label;
-        pianoEl.appendChild(btn);
-      });
-    }
-    window.addEventListener('keydown', (e)=>{
-      const k = e.key.toUpperCase();
-      const btn = [...document.querySelectorAll('.key')].find(b=>b.dataset.key===k);
-      if (btn){ e.preventDefault(); speakQueued(btn.dataset.label); btn.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:120}); }
-    });
-
     // ======== Desfile ========
     const marquee = document.getElementById('marquee');
     const catMarquee = document.getElementById('catMarquee');
@@ -407,7 +367,7 @@
       return templates[Math.floor(Math.random()*templates.length)];
     }
 
-    // ======== NOVO: Leitor ========
+    // ======== Leitor ========
     const ttsText  = document.getElementById('ttsText');
     const ttsPlay  = document.getElementById('ttsPlay');
     const ttsStop  = document.getElementById('ttsStop');
@@ -417,7 +377,6 @@
       const raw = (ttsText.value || '').trim();
       if (!raw) return;
 
-      // lê por linhas (evita utterances enormes)
       const parts = raw.split(/\n+/).map(s=>s.trim()).filter(Boolean);
       let i = 0;
       (function step(){
@@ -432,7 +391,7 @@
     ttsStop .addEventListener('click', stopAllSpeech);
     ttsClear.addEventListener('click', ()=>{ ttsText.value=''; stopAllSpeech(); });
 
-    // ======== Listeners de troca de categoria (corrigidos) ========
+    // ======== Troca de categorias ========
     catSelect .addEventListener('change', renderGrid);
     catMarquee.addEventListener('change', renderMarquee);
     catStory  .addEventListener('change', renderPicker);
@@ -462,7 +421,6 @@
       renderCatOptions(catSelect);  catSelect.value  = 'Carinhas'; renderGrid();
       renderCatOptions(catMarquee); catMarquee.value = 'Animais';  renderMarquee();
       renderCatOptions(catStory);   catStory.value   = 'Comidas';  renderPicker();
-      renderPiano();
     }
 
     registerSW();
