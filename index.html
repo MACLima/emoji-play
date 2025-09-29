@@ -359,5 +359,68 @@
     registerSW();
     init();
   </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    // Recarrega automaticamente quando o novo SW assume o controle
+    window.location.reload();
+  });
+
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (!reg) return;
+
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          showUpdateBanner(() => newWorker.postMessage({ type: 'SKIP_WAITING' }));
+        }
+      });
+    });
+  });
+}
+
+function showUpdateBanner(onClick) {
+  const banner = document.createElement('div');
+  banner.style.cssText = `
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111827;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-family: sans-serif;
+    z-index: 9999;
+  `;
+
+  banner.innerHTML = `
+    <span>🔄 Nova versão disponível</span>
+    <button style="
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    ">Atualizar</button>
+  `;
+
+  banner.querySelector('button').onclick = () => {
+    banner.remove();
+    onClick();
+  };
+
+  document.body.appendChild(banner);
+}
+</script>
 </body>
 </html>
