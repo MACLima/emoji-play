@@ -1,7 +1,7 @@
-// sw.js — Emoji Play (PWA)
-const CACHE_VERSION = 'v6'; // ↑ aumente a cada deploy
-const STATIC_CACHE  = `emoji-play-static-${CACHE_VERSION}`;
-const RUNTIME_CACHE = `emoji-play-runtime-${CACHE_VERSION}`;
+// sw.js — minimal
+const CACHE_V = 'v7';                          // ↑ mude a cada deploy
+const STATIC   = `ep-static-${CACHE_V}`;
+const RUNTIME  = `ep-runtime-${CACHE_V}`;
 
 const PRECACHE = [
   './',
@@ -13,73 +13,53 @@ const PRECACHE = [
 ];
 
 // Instala: precache do essencial
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(STATIC_CACHE).then((c) => c.addAll(PRECACHE)));
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(STATIC).then(c => c.addAll(PRECACHE)));
   self.skipWaiting();
 });
 
-// Ativa: limpa caches antigos + habilita navigation preload se houver
-self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
-    if (self.registration.navigationPreload) {
-      try { await self.registration.navigationPreload.enable(); } catch {}
-    }
+// Ativa: limpa caches antigos e assume controle
+self.addEventListener('activate', e => {
+  e.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(
-      keys
-        .filter(k => ![STATIC_CACHE, RUNTIME_CACHE].includes(k))
-        .map(k => caches.delete(k))
-    );
+    await Promise.all(keys.filter(k => ![STATIC, RUNTIME].includes(k)).map(k => caches.delete(k)));
     await self.clients.claim();
   })());
 });
 
-// Mensagem opcional para “pular espera”
-self.addEventListener('message', (e) => {
+// Mensagem opcional para atualização imediata
+self.addEventListener('message', e => {
   if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
-// Estratégias de fetch
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
+// Fetch: HTML = network-first; outros = SWR
+self.addEventListener('fetch', e => {
+  const req = e.request;
   if (req.method !== 'GET') return;
 
   const accept = req.headers.get('accept') || '';
-  const isHTML = req.mode === 'navigate'
-              || req.destination === 'document'
-              || accept.includes('text/html');
+  const isHTML = req.mode === 'navigate' || req.destination === 'document' || accept.includes('text/html');
 
-  if (isHTML) {
-    event.respondWith(htmlNetworkFirst(event));
-    return;
-  }
-
-  event.respondWith(staleWhileRevalidate(req));
+  e.respondWith(isHTML ? htmlNetworkFirst(req) : staleWhileRevalidate(req));
 });
 
-async function htmlNetworkFirst(event) {
-  const req = event.request;
-  const cache = await caches.open(RUNTIME_CACHE);
+async function htmlNetworkFirst(req) {
+  const cache = await caches.open(RUNTIME);
   try {
-    const preload = await event.preloadResponse;
-    const net = preload || await fetch(req, { cache: 'no-store' });
-    if (net && net.ok) cache.put(req, net.clone());
-    return net;
+    const fresh = await fetch(req, { cache: 'no-store' });
+    if (fresh && fresh.ok) cache.put(req, fresh.clone());
+    return fresh;
   } catch {
-    const cached = await cache.match(req);
-    return cached || caches.match('./index.html');
+    return (await cache.match(req)) || (await caches.match('./index.html')) || new Response('Offline', { status: 503 });
   }
 }
 
 async function staleWhileRevalidate(req) {
-  const cache = await caches.open(RUNTIME_CACHE);
+  const cache = await caches.open(RUNTIME);
   const cached = await cache.match(req);
-  const fetching = fetch(req).then((res) => {
-    if (res && res.ok && req.url.startsWith(self.location.origin)) {
-      cache.put(req, res.clone());
-    }
+  const fetching = fetch(req).then(res => {
+    if (res && res.ok && req.url.startsWith(self.location.origin)) cache.put(req, res.clone());
     return res;
   }).catch(() => null);
-
   return cached || fetching || new Response(null, { status: 504 });
 }
