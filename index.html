@@ -351,6 +351,11 @@
       renderPiano();
     }
 
+    // Atualiza a UI quando trocar de categoria
+    catSelect.addEventListener('change', renderGrid);
+    catMarquee.addEventListener('change', renderMarquee);
+    catStory.addEventListener('change', renderPicker);
+    
     registerSW();
     init();
   </script>
