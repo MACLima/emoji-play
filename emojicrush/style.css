@@ -90,3 +90,26 @@
 
 /* Bloqueia cliques durante resolução */
 .busy .cell { pointer-events: none; }
+
+/* Dica visual no iOS: pulso visível e estável */
+@keyframes hintPulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent), 0 0 0 rgba(0,0,0,0);
+    background: rgba(34, 211, 238, .10); /* ciano claro */
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 3px var(--accent), 0 0 12px rgba(34,211,238,.6);
+    background: rgba(34, 211, 238, .18);
+    transform: scale(1.04);
+  }
+}
+
+/* Classe exclusiva da dica (não interfere na seleção do usuário) */
+.cell.hinting {
+  animation: hintPulse .85s ease-in-out infinite alternate;
+  outline: none; /* evitamos depender do outline no iOS */
+  will-change: transform, box-shadow, background;
+  -webkit-transform: translateZ(0); /* ajuda no repaint do iOS */
+}
+
