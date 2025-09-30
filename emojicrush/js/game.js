@@ -1,9 +1,18 @@
+// === Temas ===
+const THEMES = {
+  "Frutas": ["🍎","🍌","🍇","🍓","🍍","🍊","🍒"],
+  "Carinhas": ["😀","😁","😂","😊","😍","😜","😎","😭"],
+  "Carinhas de gato": ["😺","😸","😹","😻","😼","😽","🙀","😿","😾"],
+  "Animais": ["🐶","🐱","🦊","🐻","🐼","🐨","🐯","🦁","🐷","🐸"]
+};
+const DEFAULT_THEME = "Frutas";
+
 // === Config ===
-const EMOJIS = ["🍎","🍌","🍇","🍓","🍍","🍊","🍒"];
 const SIZE = 8;
 const BASE_POINTS_PER_TILE = 10;
 
 // === Estado ===
+let currentTheme = localStorage.getItem('emojicrush_theme') || DEFAULT_THEME;
 let board = [];          // board[y][x] => emoji | null
 let cells = [];          // cells[y][x] => elemento DOM
 let selected = null;     // {x,y, el}
@@ -25,7 +34,6 @@ function addScore(points) {
 
 // ===== Som =====
 let swapSound, matchSound;
-
 function getSwapSound() {
   if (!swapSound) {
     swapSound = document.getElementById('swap-sound') || new Audio('./sounds/pop.mp3');
@@ -62,7 +70,11 @@ function playMatchSound() { const a = getMatchSound(); a.currentTime = 0; a.play
 
 // ===== Util =====
 const inBounds = (x, y) => x >= 0 && x < SIZE && y >= 0 && y < SIZE;
-const randomEmoji = () => EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+const emojiSet = () => THEMES[currentTheme] || THEMES[DEFAULT_THEME];
+const randomEmoji = () => {
+  const set = emojiSet();
+  return set[Math.floor(Math.random() * set.length)];
+};
 function isAdjacent(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1; }
 function setBusy(on) {
   busy = on;
@@ -350,6 +362,29 @@ function shuffleIfHasInitialMatches(maxTries = 50) {
   }
 }
 
+// ===== Tema: UI =====
+function populateThemeSelect() {
+  const sel = document.getElementById('themeSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+  Object.keys(THEMES).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    sel.appendChild(opt);
+  });
+  sel.value = currentTheme;
+  sel.addEventListener('change', () => {
+    const next = sel.value;
+    if (!THEMES[next]) return;
+    currentTheme = next;
+    localStorage.setItem('emojicrush_theme', currentTheme);
+    // reconstrói o board mantendo pontuação
+    createBoard();
+    shuffleIfHasInitialMatches();
+    renderBoard();
+  });
+}
+
 // ===== Service Worker (escopo desta pasta) =====
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(()=>{});
@@ -357,6 +392,7 @@ if ('serviceWorker' in navigator) {
 
 // ===== Init =====
 (function init() {
+  populateThemeSelect();
   createBoard();
   shuffleIfHasInitialMatches();
   renderBoard();
