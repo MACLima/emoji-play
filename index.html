@@ -5,51 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Emoji Play</title>
   <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192.png" />
   <style>
-    :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --txt: #e5e7eb;
-      --accent: #22d3ee;
-      --accent-2: #a78bfa;
-    }
-    * { box-sizing: border-box; }
-    html, body { margin:0; height:100%; background:var(--bg); color:var(--txt); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans; }
-    .wrap { max-width: 800px; margin: 0 auto; padding: 24px; text-align: center; }
-    h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); margin-bottom: 24px; }
-    .games { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-    .card {
-      background: var(--panel);
-      border-radius: 12px;
-      padding: 20px;
-      text-decoration: none;
-      color: var(--txt);
-      border: 1px solid rgba(255,255,255,0.1);
-      transition: transform .15s, background .2s;
-    }
-    .card:hover { background: rgba(255,255,255,0.05); transform: translateY(-4px); }
-    .emoji { font-size: 36px; margin-bottom: 8px; }
-    .title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
-    .desc { font-size: 13px; opacity: .8; }
-    footer { font-size: 12px; opacity: .6; margin-top: 32px; }
+    :root { --bg:#0f172a; --panel:#111827; --txt:#e5e7eb; --accent:#22d3ee; --accent-2:#a78bfa; }
+    *{ box-sizing:border-box }
+    html,body{ margin:0; height:100%; background:var(--bg); color:var(--txt);
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans }
+    .wrap{ max-width:800px; margin:0 auto; padding:24px; text-align:center }
+    h1{ font-size:clamp(1.5rem,4vw,2.5rem); margin-bottom:16px }
+    .actions{ margin-bottom:20px }
+    .button{ appearance:none; border:none; cursor:pointer; border-radius:12px; padding:10px 14px;
+      font-weight:800; color:#0b1020; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
+    .games{ display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)) }
+    .card{ background:var(--panel); border-radius:12px; padding:20px; text-decoration:none; color:var(--txt);
+      border:1px solid rgba(255,255,255,.1); transition:transform .15s, background .2s }
+    .card:hover{ background:rgba(255,255,255,.05); transform:translateY(-4px) }
+    .emoji{ font-size:36px; margin-bottom:8px }
+    .title{ font-weight:600; font-size:16px; margin-bottom:4px }
+    .desc{ font-size:13px; opacity:.8 }
+    footer{ font-size:12px; opacity:.6; margin-top:24px }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>🎮 Emoji Play</h1>
+
+    <div class="actions">
+      <button id="installBtn" class="button" disabled>Instalar no aparelho</button>
+    </div>
+
     <div class="games">
-      <a href="./emojiread/" class="card">
+      <a href="/emojiread/" class="card">
         <div class="emoji">🗣️</div>
         <div class="title">Leitor de Emojis</div>
         <div class="desc">Digite frases ou emojis e ouça a leitura em voz alta.</div>
       </a>
-      <a href="./emojicrush/" class="card">
+      <a href="/emojicrush/" class="card">
         <div class="emoji">🍒</div>
         <div class="title">Emoji Crush</div>
         <div class="desc">Combine 3 ou mais emojis para marcar pontos.</div>
       </a>
     </div>
+
     <footer>Feito com ❤️ para o Luc.</footer>
   </div>
+
+  <!-- PWA root: usa seu helper -->
+  <script type="module">
+    import { initPWA } from "/assets/js/pwa.js";
+    initPWA({ swPath: "/sw.js", scope: "/", installBtnId: "installBtn" });
+  </script>
 </body>
 </html>
