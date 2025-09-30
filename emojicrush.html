@@ -11,6 +11,7 @@
       --panel: #111827;
       --txt: #e5e7eb;
       --accent: #22d3ee;
+      --accent-2: #a78bfa;
     }
 
     * { box-sizing: border-box; }
@@ -21,17 +22,46 @@
       background: var(--bg);
       color: var(--txt);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
       padding: 16px;
     }
 
     h1 {
-      margin-bottom: 16px;
+      margin: 0 0 8px 0;
       font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    }
+
+    /* Navbar fina (mesma cara da página principal) */
+    .navbar {
+      display: flex;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 16px;
+    }
+    .nav-item {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--txt);
+      font-size: 14px;
+      padding: 8px 0;
+      cursor: pointer;
       text-align: center;
+      transition: background .2s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); }
+    .nav-item.active {
+      color: var(--accent);
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .board-wrap {
+      display: flex;
+      justify-content: center;
     }
 
     .board {
@@ -43,6 +73,7 @@
       border-radius: 12px;
       box-shadow: 0 5px 20px rgba(0,0,0,.3);
       user-select: none;
+      touch-action: none; /* melhora gesto no mobile */
     }
 
     .cell {
@@ -54,40 +85,205 @@
       background: rgba(255,255,255,0.05);
       border-radius: 8px;
       cursor: pointer;
-      transition: transform .1s, background .2s;
+      transition: transform .1s, background .2s, box-shadow .2s;
+      will-change: transform;
+    }
+    .cell:hover {
+      transform: scale(1.06);
+      background: rgba(255,255,255,0.1);
+    }
+    .cell.selected {
+      outline: 2px solid var(--accent);
+      box-shadow: 0 0 0 2px var(--accent) inset;
+      background: rgba(34,211,238,0.1);
+    }
+    .cell.flash {
+      animation: flash .25s ease;
+    }
+    @keyframes flash {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
     }
 
-    .cell:hover {
-      transform: scale(1.1);
-      background: rgba(255,255,255,0.1);
+    .hint {
+      opacity: .75;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Emoji Crush 🍭</h1>
+  <div class="wrap">
+    <h1>Emoji Crush</h1>
 
-  <div id="board" class="board"></div>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <button class="nav-item" onclick="location.href='index.html'">Leitor</button>
+      <button class="nav-item active" onclick="location.href='emojicrush.html'">Jogo</button>
+    </nav>
+
+    <div class="board-wrap">
+      <div id="board" class="board" aria-label="Tabuleiro de emojis"></div>
+    </div>
+
+    <p class="hint">Toque em um emoji e depois em um vizinho para trocar. No mobile, um pequeno arrasto também funciona.</p>
+  </div>
 
   <script>
+    // === Config ===
     const EMOJIS = ["🍎","🍌","🍇","🍓","🍍","🍊","🍒"];
     const SIZE = 8;
 
-    function randomEmoji() {
-      return EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+    // === Estado ===
+    let board = [];          // board[y][x] => emoji
+    let cells = [];          // cells[y][x] => elemento DOM
+    let selected = null;     // {x,y, el}
+    let dragStart = null;    // {x,y, clientX, clientY}
+
+    // === Util ===
+    const idx = (x, y) => y * SIZE + x;
+    const inBounds = (x, y) => x >= 0 && x < SIZE && y >= 0 && y < SIZE;
+    const randomEmoji = () => EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+
+    function isAdjacent(a, b) {
+      return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
     }
 
-    function createBoard() {
-      const board = document.getElementById('board');
-      board.innerHTML = '';
-      for (let i = 0; i < SIZE * SIZE; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.textContent = randomEmoji();
-        board.appendChild(cell);
+    function swapModel(a, b) {
+      const tmp = board[a.y][a.x];
+      board[a.y][a.x] = board[b.y][b.x];
+      board[b.y][b.x] = tmp;
+    }
+
+    function renderSwap(a, b) {
+      // Atualiza o texto dos dois elementos (visual simples)
+      const ea = cells[a.y][a.x];
+      const eb = cells[b.y][b.x];
+      const tmpTxt = ea.textContent;
+      ea.textContent = eb.textContent;
+      eb.textContent = tmpTxt;
+
+      ea.classList.add('flash');
+      eb.classList.add('flash');
+      setTimeout(() => { ea.classList.remove('flash'); eb.classList.remove('flash'); }, 250);
+    }
+
+    function clearSelection() {
+      if (selected?.el) selected.el.classList.remove('selected');
+      selected = null;
+    }
+
+    function chooseCell(x, y) {
+      const el = cells[y][x];
+      if (!selected) {
+        selected = { x, y, el };
+        el.classList.add('selected');
+        return;
+      }
+      const other = { x, y, el };
+      if (selected.x === x && selected.y === y) {
+        // clicou na mesma célula -> desmarca
+        clearSelection();
+        return;
+      }
+      if (!isAdjacent(selected, other)) {
+        // Troca a seleção para o novo
+        selected.el.classList.remove('selected');
+        selected = other;
+        selected.el.classList.add('selected');
+        return;
+      }
+      // Adjacent -> faz swap
+      swapModel(selected, other);
+      renderSwap(selected, other);
+      clearSelection();
+    }
+
+    // === Drag / Swipe ===
+    function onPointerDown(e, x, y) {
+      const touch = e.touches?.[0] || e;
+      dragStart = { x, y, clientX: touch.clientX, clientY: touch.clientY };
+      // marca seleção para feedback
+      if (!selected) {
+        selected = { x, y, el: cells[y][x] };
+        selected.el.classList.add('selected');
       }
     }
 
+    function onPointerUp(e) {
+      if (!dragStart) return;
+      const touch = e.changedTouches?.[0] || e;
+      const dx = touch.clientX - dragStart.clientX;
+      const dy = touch.clientY - dragStart.clientY;
+
+      // limiar mínimo para considerar swipe
+      const TH = 12; // px
+      let nx = dragStart.x, ny = dragStart.y;
+
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > TH) {
+        nx = dragStart.x + (dx > 0 ? 1 : -1);
+      } else if (Math.abs(dy) > TH) {
+        ny = dragStart.y + (dy > 0 ? 1 : -1);
+      } else {
+        // swipe muito curto: trata como clique simples (seleciona)
+        chooseCell(dragStart.x, dragStart.y);
+        dragStart = null;
+        return;
+      }
+
+      if (inBounds(nx, ny)) {
+        const a = { x: dragStart.x, y: dragStart.y, el: cells[dragStart.y][dragStart.x] };
+        const b = { x: nx, y: ny, el: cells[ny][nx] };
+        swapModel(a, b);
+        renderSwap(a, b);
+      }
+      clearSelection();
+      dragStart = null;
+    }
+
+    // === Board ===
+    function createBoard() {
+      board = Array.from({ length: SIZE }, () =>
+        Array.from({ length: SIZE }, () => randomEmoji())
+      );
+    }
+
+    function renderBoard() {
+      const container = document.getElementById('board');
+      container.style.gridTemplateColumns = `repeat(${SIZE}, 1fr)`;
+      container.innerHTML = '';
+      cells = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
+
+      for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.textContent = board[y][x];
+          cell.dataset.x = x;
+          cell.dataset.y = y;
+
+          // Clique/Toque (seleciona e tenta trocar com adjacente)
+          cell.addEventListener('click', () => chooseCell(x, y));
+
+          // Suporte a arrastar (pointer/touch/mouse)
+          cell.addEventListener('pointerdown', (e) => onPointerDown(e, x, y));
+          cell.addEventListener('pointerup', onPointerUp);
+          cell.addEventListener('touchstart', (e) => onPointerDown(e, x, y), { passive: true });
+          cell.addEventListener('touchend', onPointerUp, { passive: true });
+          cell.addEventListener('mousedown', (e) => onPointerDown(e, x, y));
+          cell.addEventListener('mouseup', onPointerUp);
+
+          container.appendChild(cell);
+          cells[y][x] = cell;
+        }
+      }
+    }
+
+    // Init
     createBoard();
+    renderBoard();
   </script>
 </body>
 </html>
