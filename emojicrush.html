@@ -15,7 +15,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html, body {
       margin: 0;
       height: 100%;
@@ -24,101 +23,51 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans;
     }
 
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 16px;
-    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    h1 { margin: 0 0 8px 0; font-size: clamp(1.2rem, 2.5vw, 1.8rem); }
 
-    h1 {
-      margin: 0 0 8px 0;
-      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-    }
-
-    /* Navbar fina (mesma cara da página principal) */
-    .navbar {
-      display: flex;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      margin-bottom: 16px;
-    }
+    /* Navbar */
+    .navbar { display: flex; border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: 16px; }
     .nav-item {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--txt);
-      font-size: 14px;
-      padding: 8px 0;
-      cursor: pointer;
-      text-align: center;
-      transition: background .2s;
+      flex: 1; background: none; border: none; color: var(--txt);
+      font-size: 14px; padding: 8px 0; cursor: pointer; text-align: center; transition: background .2s;
     }
     .nav-item:hover { background: rgba(255,255,255,0.05); }
-    .nav-item.active {
-      color: var(--accent);
-      font-weight: 600;
-      border-bottom: 2px solid var(--accent);
-    }
+    .nav-item.active { color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--accent); }
 
-    .board-wrap {
-      display: flex;
-      justify-content: center;
-    }
-
+    .board-wrap { display: flex; justify-content: center; }
     .board {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 4px;
-      background: var(--panel);
-      padding: 4px;
-      border-radius: 12px;
-      box-shadow: 0 5px 20px rgba(0,0,0,.3);
-      user-select: none;
-      touch-action: none; /* melhora gesto no mobile */
+      display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px;
+      background: var(--panel); padding: 4px; border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.3); user-select: none; touch-action: none;
     }
 
     .cell {
-      aspect-ratio: 1;
-      font-size: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.05);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform .1s, background .2s, box-shadow .2s;
-      will-change: transform;
+      aspect-ratio: 1; font-size: 28px; display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+      transition: transform .1s, background .2s, box-shadow .2s, opacity .18s;
+      will-change: transform, opacity;
     }
-    .cell:hover {
-      transform: scale(1.06);
-      background: rgba(255,255,255,0.1);
-    }
+    .cell:hover { transform: scale(1.06); background: rgba(255,255,255,0.1); }
     .cell.selected {
-      outline: 2px solid var(--accent);
-      box-shadow: 0 0 0 2px var(--accent) inset;
-      background: rgba(34,211,238,0.1);
+      outline: 2px solid var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; background: rgba(34,211,238,0.1);
     }
-    .cell.flash {
-      animation: flash .25s ease;
-    }
-    @keyframes flash {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-      100% { transform: scale(1); }
-    }
+    .cell.flash { animation: flash .25s ease; }
+    @keyframes flash { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
 
-    .hint {
-      opacity: .75;
-      font-size: 12px;
-      text-align: center;
-      margin-top: 10px;
-    }
+    .cell.match { background: rgba(255,255,255,0.18); }
+    .cell.vanish { opacity: 0; transform: scale(0.85); }
+
+    .hint { opacity: .75; font-size: 12px; text-align: center; margin-top: 10px; }
+
+    /* Enquanto resolve, desabilita ponteiro (evita cliques) */
+    .busy .cell { pointer-events: none; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Emoji Crush</h1>
 
-    <!-- Navbar -->
     <nav class="navbar">
       <button class="nav-item" onclick="location.href='index.html'">Leitor</button>
       <button class="nav-item active" onclick="location.href='emojicrush.html'">Jogo</button>
@@ -128,10 +77,10 @@
       <div id="board" class="board" aria-label="Tabuleiro de emojis"></div>
     </div>
 
-    <p class="hint">Toque em um emoji e depois em um vizinho para trocar. No mobile, um pequeno arrasto também funciona.</p>
+    <p class="hint">Troque dois vizinhos. A troca só vale se formar 3 ou mais. Cascatas acontecem automaticamente.</p>
   </div>
 
-  <!-- Áudio antes do script para existir no DOM -->
+  <!-- Som -->
   <audio id="swap-sound" src="sounds/pop.mp3" preload="auto"></audio>
 
   <script>
@@ -140,10 +89,11 @@
     const SIZE = 8;
 
     // === Estado ===
-    let board = [];          // board[y][x] => emoji
+    let board = [];          // board[y][x] => emoji | null
     let cells = [];          // cells[y][x] => elemento DOM
     let selected = null;     // {x,y, el}
     let dragStart = null;    // {x,y, clientX, clientY}
+    let busy = false;        // bloqueia interação durante resolução
 
     // === Som ===
     let swapSound;
@@ -158,11 +108,7 @@
       const a = getSwapSound();
       try {
         a.volume = 0;
-        a.play().then(() => {
-          a.pause();
-          a.currentTime = 0;
-          a.volume = 0.6;
-        }).catch(()=>{});
+        a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = 0.6; }).catch(()=>{});
       } catch {}
       window.removeEventListener('pointerdown', primeAudio);
       window.removeEventListener('touchstart', primeAudio);
@@ -171,17 +117,16 @@
     window.addEventListener('pointerdown', primeAudio, { once: true });
     window.addEventListener('touchstart', primeAudio, { once: true });
     window.addEventListener('click', primeAudio, { once: true });
-
-    function playSwapSound() {
-      const a = getSwapSound();
-      a.currentTime = 0;
-      a.play().catch(()=>{});
-    }
+    function playSwapSound() { const a = getSwapSound(); a.currentTime = 0; a.play().catch(()=>{}); }
 
     // === Util ===
     const inBounds = (x, y) => x >= 0 && x < SIZE && y >= 0 && y < SIZE;
     const randomEmoji = () => EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
     function isAdjacent(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1; }
+    function setBusy(on) {
+      busy = on;
+      document.getElementById('board').classList.toggle('busy', on);
+    }
 
     function swapModel(a, b) {
       const tmp = board[a.y][a.x];
@@ -190,19 +135,10 @@
     }
 
     function renderSwap(a, b) {
-      const ea = cells[a.y][a.x];
-      const eb = cells[b.y][b.x];
-      const tmpTxt = ea.textContent;
-      ea.textContent = eb.textContent;
-      eb.textContent = tmpTxt;
-
-      ea.classList.add('flash');
-      eb.classList.add('flash');
-      playSwapSound();  // som aqui
-      setTimeout(() => {
-        ea.classList.remove('flash');
-        eb.classList.remove('flash');
-      }, 250);
+      const ea = cells[a.y][a.x], eb = cells[b.y][b.x];
+      const tmpTxt = ea.textContent; ea.textContent = eb.textContent; eb.textContent = tmpTxt;
+      ea.classList.add('flash'); eb.classList.add('flash'); playSwapSound();
+      setTimeout(() => { ea.classList.remove('flash'); eb.classList.remove('flash'); }, 250);
     }
 
     function clearSelection() {
@@ -210,7 +146,155 @@
       selected = null;
     }
 
+    // === MATCH LOGIC ===
+    function findMatches() {
+      // Retorna Set de chaves "x,y" a serem removidas
+      const toClear = new Set();
+
+      // Linhas
+      for (let y = 0; y < SIZE; y++) {
+        let runStart = 0;
+        for (let x = 1; x <= SIZE; x++) {
+          const cur = x < SIZE ? board[y][x] : null;
+          const prev = board[y][x-1];
+          if (cur !== prev || cur === null) {
+            const runLen = x - runStart;
+            if (prev !== null && runLen >= 3) {
+              for (let k = runStart; k < x; k++) toClear.add(`${k},${y}`);
+            }
+            runStart = x;
+          }
+        }
+      }
+
+      // Colunas
+      for (let x = 0; x < SIZE; x++) {
+        let runStart = 0;
+        for (let y = 1; y <= SIZE; y++) {
+          const cur = y < SIZE ? board[y][x] : null;
+          const prev = board[y-1][x];
+          if (cur !== prev || cur === null) {
+            const runLen = y - runStart;
+            if (prev !== null && runLen >= 3) {
+              for (let k = runStart; k < y; k++) toClear.add(`${x},${k}`);
+            }
+            runStart = y;
+          }
+        }
+      }
+
+      return toClear;
+    }
+
+    function markMatches(toClear) {
+      // feedback visual breve
+      toClear.forEach(key => {
+        const [x, y] = key.split(',').map(Number);
+        cells[y][x].classList.add('match');
+      });
+    }
+
+    function clearMatches(toClear) {
+      return new Promise(resolve => {
+        // anima desaparecer
+        toClear.forEach(key => {
+          const [x, y] = key.split(',').map(Number);
+          const cell = cells[y][x];
+          cell.classList.add('vanish');
+        });
+
+        // depois de animar, zera no modelo e no DOM
+        setTimeout(() => {
+          toClear.forEach(key => {
+            const [x, y] = key.split(',').map(Number);
+            board[y][x] = null;
+            const cell = cells[y][x];
+            cell.textContent = ''; // vazio
+            cell.classList.remove('match', 'vanish');
+          });
+          resolve();
+        }, 180);
+      });
+    }
+
+    function applyGravity() {
+      // Para cada coluna, compacta não-nulos para baixo
+      for (let x = 0; x < SIZE; x++) {
+        let write = SIZE - 1;
+        for (let y = SIZE - 1; y >= 0; y--) {
+          if (board[y][x] !== null) {
+            const val = board[y][x];
+            if (y !== write) {
+              board[write][x] = val;
+              board[y][x] = null;
+            }
+            write--;
+          }
+        }
+      }
+      // Atualiza DOM conforme board
+      for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+          cells[y][x].textContent = board[y][x] || '';
+        }
+      }
+    }
+
+    function refill() {
+      for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+          if (board[y][x] === null) {
+            const e = randomEmoji();
+            board[y][x] = e;
+            cells[y][x].textContent = e;
+          }
+        }
+      }
+    }
+
+    async function resolveBoardCascade() {
+      // Repetir: encontrar matches -> limpar -> gravidade -> refill, até não ter mais
+      while (true) {
+        const matches = findMatches();
+        if (matches.size === 0) break;
+        markMatches(matches);
+        await clearMatches(matches);
+        applyGravity();
+        refill();
+        // pequeno intervalo visual entre cascatas
+        await new Promise(r => setTimeout(r, 60));
+      }
+    }
+
+    function swapAndResolve(a, b) {
+      setBusy(true);
+      // 1) swap no modelo e na tela
+      swapModel(a, b);
+      renderSwap(a, b);
+
+      // 2) checar se houve match; se não, reverter
+      const hasMatch = findMatches().size > 0;
+      if (!hasMatch) {
+        // reverte com pequeno delay para o flash tocar
+        setTimeout(() => {
+          // reverte modelo+DOM
+          swapModel(a, b);
+          renderSwap(a, b);
+          setBusy(false);
+        }, 140);
+        return;
+      }
+
+      // 3) houve match: resolve cascata
+      (async () => {
+        await resolveBoardCascade();
+        setBusy(false);
+      })();
+    }
+
+    // === Interação ===
     function chooseCell(x, y) {
+      if (busy) return;
       const el = cells[y][x];
       if (!selected) {
         selected = { x, y, el };
@@ -218,24 +302,19 @@
         return;
       }
       const other = { x, y, el };
-      if (selected.x === x && selected.y === y) {
-        clearSelection();
-        return;
-      }
+      if (selected.x === x && selected.y === y) { clearSelection(); return; }
       if (!isAdjacent(selected, other)) {
         selected.el.classList.remove('selected');
-        selected = other;
-        selected.el.classList.add('selected');
-        return;
+        selected = other; selected.el.classList.add('selected'); return;
       }
-      // adjacente -> swap
-      swapModel(selected, other);
-      renderSwap(selected, other);
-      clearSelection();
+      // adjacente -> tenta swap com validação
+      selected.el.classList.remove('selected');
+      const a = selected; const b = other; selected = null;
+      swapAndResolve(a, b);
     }
 
-    // === Drag / Swipe ===
     function onPointerDown(e, x, y) {
+      if (busy) return;
       const touch = e.touches?.[0] || e;
       dragStart = { x, y, clientX: touch.clientX, clientY: touch.clientY };
       if (!selected) {
@@ -245,6 +324,7 @@
     }
 
     function onPointerUp(e) {
+      if (busy) return;
       if (!dragStart) return;
       const touch = e.changedTouches?.[0] || e;
       const dx = touch.clientX - dragStart.clientX;
@@ -266,10 +346,13 @@
       if (inBounds(nx, ny)) {
         const a = { x: dragStart.x, y: dragStart.y, el: cells[dragStart.y][dragStart.x] };
         const b = { x: nx, y: ny, el: cells[ny][nx] };
-        swapModel(a, b);
-        renderSwap(a, b);
+        // limpa visual de seleção
+        if (selected?.el) selected.el.classList.remove('selected');
+        selected = null;
+        swapAndResolve(a, b);
+      } else {
+        clearSelection();
       }
-      clearSelection();
       dragStart = null;
     }
 
@@ -291,12 +374,9 @@
           const cell = document.createElement('div');
           cell.className = 'cell';
           cell.textContent = board[y][x];
-          cell.dataset.x = x;
-          cell.dataset.y = y;
+          cell.dataset.x = x; cell.dataset.y = y;
 
           cell.addEventListener('click', () => chooseCell(x, y));
-
-          // Suporte a arrastar/toque
           cell.addEventListener('pointerdown', (e) => onPointerDown(e, x, y));
           cell.addEventListener('pointerup', onPointerUp);
           cell.addEventListener('touchstart', (e) => onPointerDown(e, x, y), { passive: true });
@@ -310,8 +390,24 @@
       }
     }
 
+    // Garante que o tabuleiro inicial não comece com matches (opcional simples)
+    function shuffleIfHasInitialMatches(maxTries = 50) {
+      for (let i = 0; i < maxTries; i++) {
+        if (findMatches().size === 0) return;
+        // embaralha superficialmente
+        for (let y = 0; y < SIZE; y++) {
+          for (let x = 0; x < SIZE; x++) {
+            const rx = Math.floor(Math.random() * SIZE);
+            const ry = Math.floor(Math.random() * SIZE);
+            const tmp = board[y][x]; board[y][x] = board[ry][rx]; board[ry][rx] = tmp;
+          }
+        }
+      }
+    }
+
     // Init
     createBoard();
+    shuffleIfHasInitialMatches();
     renderBoard();
   </script>
 </body>
