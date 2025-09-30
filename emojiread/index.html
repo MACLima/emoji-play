@@ -5,32 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Emoji Play — Leitor</title>
   <meta name="theme-color" content="#0f172a"/>
-  <link rel="manifest" href="manifest.webmanifest"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Emoji Play"/>
-  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <meta name="description" content="Leitor de texto com voz do sistema (iOS/Android).">
   <link rel="stylesheet" href="/assets/css/theme.css">
   <link rel="stylesheet" href="./style.css">
-  <meta name="description" content="Leitor de texto com voz do sistema (iOS/Android). PWA com modo offline e atualização automática.">
 </head>
 <body>
   <div class="container">
+    <header><h1>Emoji Play</h1></header>
 
-    <!-- 1. Barra de título -->
-    <header>
-      <h1>Emoji Play</h1>
-    </header>
-
-    <!-- Barra de navegação -->
     <nav class="navbar">
       <button class="nav-item active" onclick="location.href='/emojiread'">Leitor</button>
       <button class="nav-item" onclick="location.href='/emojicrush'">Jogo</button>
       <button class="nav-item" onclick="location.href='/'">Início</button>
     </nav>
 
-  
-    <!-- 2. O jogo (Leitor) -->
+    <!-- Leitor -->
     <main id="leitor" class="card panel" role="region" aria-label="Leitor de Texto">
       <div class="controls">
         <label style="flex:1; display:flex; flex-direction:column; gap:6px">
@@ -47,32 +36,18 @@
         Dica: separe frases por linhas — o leitor fala em sequência.
       </p>
     </main>
-  
-    <!-- 3. Barra de ferramentas -->
+
+    <!-- Ferramentas de voz -->
     <section aria-label="Configurações de voz" class="card panel">
       <div class="controls" style="padding:8px 10px">
-        <label>Voz:
-          <select id="voice" class="select"></select>
-        </label>
-        <label>Velocidade 
-          <input id="rate" class="input" type="range" min="0.5" max="1.4" step="0.1" value="1">
-        </label>
-        <label>Tom 
-          <input id="pitch" class="input" type="range" min="0.7" max="1.3" step="0.1" value="1">
-        </label>
+        <label>Voz: <select id="voice" class="select"></select></label>
+        <label>Velocidade <input id="rate" class="input" type="range" min="0.5" max="1.4" step="0.1" value="1"></label>
+        <label>Tom <input id="pitch" class="input" type="range" min="0.7" max="1.3" step="0.1" value="1"></label>
         <button type="button" id="stopAll" class="button">Parar fala</button>
       </div>
-  
-      <div class="controls" style="margin-top:8px; gap:8px">
-        <button type="button" id="installBtn" class="button primary" disabled>Instalar no aparelho</button>
-        <span style="opacity:.7; font-size:12px">Para instalar, abra via HTTPS ou em <strong>localhost</strong>.</span>
-      </div>
     </section>
-  
-    <footer>
-      Feito com ❤️ para o Luc. Suporta voz nativa do navegador (Chrome/Android, Safari/iOS e Edge).
-    </footer>
-  
+
+    <footer>Feito com ❤️ para o Luc. Suporta voz nativa do navegador (Chrome/Android, Safari/iOS e Edge).</footer>
   </div>
 
   <script src="./js/reader.js"></script>
