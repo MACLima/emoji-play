@@ -1,5 +1,5 @@
 :root{
-  --bg:#0f172a; --panel:#111827; --txt:#e5e7eb; --accent:#22d3ee; --accent-2:#a78bfa;
+  --bg:#ffffff; --panel:#f7f7f8; --txt:#111827; --accent:#22d3ee; --accent-2:#a78bfa;
 }
 *{ box-sizing:border-box }
 html,body{ margin:0; height:100%; background:var(--bg); color:var(--txt);
@@ -8,37 +8,55 @@ html,body{ margin:0; height:100%; background:var(--bg); color:var(--txt);
 h1{ margin:0 0 8px; font-size:clamp(1.2rem,2.5vw,1.8rem) }
 
 /* Navbar */
-.navbar{ display:flex; border-bottom:1px solid rgba(255,255,255,.15); margin-bottom:12px }
+.navbar{ display:flex; border-bottom:1px solid rgba(0,0,0,.12); margin-bottom:12px }
 .nav-item{ flex:1; background:none; border:none; color:var(--txt); font-size:14px;
   padding:8px 0; cursor:pointer; text-align:center; transition:background .2s }
-.nav-item:hover{ background:rgba(255,255,255,.05) }
+.nav-item:hover{ background:rgba(0,0,0,.04) }
 .nav-item.active{ color:var(--accent); font-weight:600; border-bottom:2px solid var(--accent) }
 
-/* HUD */
-.hud{ display:flex; gap:14px; align-items:center; justify-content:center; margin:6px 0 16px; font-weight:700 }
-.hud .pill{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-  padding:6px 10px; border-radius:999px }
-.score-bump{ animation:bump .35s ease }
-@keyframes bump{ 0%{transform:scale(1)} 40%{transform:scale(1.2)} 100%{transform:scale(1)} }
+/* Painéis / cartinhas */
+.panel{ background:var(--panel); border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:16px }
+.card{ background:linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.35));
+  border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:16px; box-shadow: 0 6px 20px rgba(0,0,0,.06) }
 
-/* Board */
-.board-wrap{ display:flex; justify-content:center }
-.board{ display:grid; grid-template-columns:repeat(8,1fr); gap:4px; background:var(--panel); padding:4px;
-  border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,.3); user-select:none; touch-action:none }
-.cell{ aspect-ratio:1; font-size:28px; display:flex; align-items:center; justify-content:center;
-  background:rgba(255,255,255,.05); border-radius:8px; cursor:pointer;
-  transition:transform .1s, background .2s, box-shadow .2s, opacity .18s; will-change:transform,opacity }
-.cell:hover{ transform:scale(1.06); background:rgba(255,255,255,.1) }
-.cell.selected{ outline:2px solid var(--accent); box-shadow:0 0 0 2px var(--accent) inset; background:rgba(34,211,238,.1) }
-.cell.flash{ animation:flash .25s ease }
-@keyframes flash{ 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
-.cell.match{ background:rgba(255,255,255,.18) }
-.cell.vanish{ opacity:0; transform:scale(.85) }
+/* Controles */
+.controls{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+.controls>*{ min-width:0 }
+.button{
+  appearance:none; border:none; cursor:pointer; border-radius:12px; padding:10px 14px;
+  font-weight:800; color:#0b1020; background:linear-gradient(90deg,var(--accent),var(--accent-2))
+}
+.button.ghost{ background:transparent; color:var(--txt); border:1px solid rgba(0,0,0,.12) }
 
-.hint{ opacity:.75; font-size:12px; text-align:center; margin-top:10px }
-
-/* Footer consistente */
-footer { opacity: .7; font-size: 12px; margin-top: 20px; text-align: center; }
-
-/* Bloqueia cliques durante resolução */
+/* Tabuleiro */
+.board{
+  display:grid; grid-template-columns:repeat(8,1fr); gap:6px;
+  width:min(90vw,560px); margin:8px auto 0
+}
+.cell{
+  aspect-ratio:1/1; border-radius:10px; display:grid; place-items:center;
+  font-size:clamp(22px,5vw,32px); user-select:none; cursor:pointer;
+  background:#fff; border:1px solid rgba(0,0,0,.08); transition:transform .12s
+}
+.cell:hover{ transform:translateY(-2px) }
+.cell.selected{ outline:2px solid var(--accent); outline-offset:2px }
 .busy .cell{ pointer-events:none }
+
+/* Status */
+.status{ display:flex; gap:12px; align-items:center; justify-content:center; margin-top:10px }
+.badge{
+  padding:6px 10px; border-radius:999px; font-weight:700; letter-spacing:.3px;
+  background:#fff; border:1px solid rgba(0,0,0,.08)
+}
+
+/* Responsividade */
+@supports(padding: max(0px)) {
+  :root{
+    --inset-left: env(safe-area-inset-left, 0px);
+    --inset-right: env(safe-area-inset-right, 0px);
+  }
+  .wrap{
+    padding-left: max(16px, var(--inset-left));
+    padding-right: max(16px, var(--inset-right));
+  }
+}
