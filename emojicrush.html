@@ -60,7 +60,7 @@
 
     .hint { opacity: .75; font-size: 12px; text-align: center; margin-top: 10px; }
 
-    /* Enquanto resolve, desabilita ponteiro (evita cliques) */
+    /* Bloqueia cliques durante resolução */
     .busy .cell { pointer-events: none; }
   </style>
 </head>
@@ -80,8 +80,9 @@
     <p class="hint">Troque dois vizinhos. A troca só vale se formar 3 ou mais. Cascatas acontecem automaticamente.</p>
   </div>
 
-  <!-- Som -->
-  <audio id="swap-sound" src="sounds/pop.mp3" preload="auto"></audio>
+  <!-- Áudios -->
+  <audio id="swap-sound"  src="sounds/pop.mp3"   preload="auto"></audio>
+  <audio id="match-sound" src="sounds/match.mp3" preload="auto"></audio>
 
   <script>
     // === Config ===
@@ -95,8 +96,9 @@
     let dragStart = null;    // {x,y, clientX, clientY}
     let busy = false;        // bloqueia interação durante resolução
 
-    // === Som ===
-    let swapSound;
+    // === Som: troca e match ===
+    let swapSound, matchSound;
+
     function getSwapSound() {
       if (!swapSound) {
         swapSound = document.getElementById('swap-sound') || new Audio('sounds/pop.mp3');
@@ -104,11 +106,20 @@
       }
       return swapSound;
     }
+    function getMatchSound() {
+      if (!matchSound) {
+        matchSound = document.getElementById('match-sound') || new Audio('sounds/match.mp3');
+        matchSound.volume = 0.7;
+      }
+      return matchSound;
+    }
+    // “Priming” para iOS (desbloqueia áudio no primeiro gesto)
     function primeAudio() {
-      const a = getSwapSound();
+      const s1 = getSwapSound();
+      const s2 = getMatchSound();
       try {
-        a.volume = 0;
-        a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = 0.6; }).catch(()=>{});
+        s1.volume = 0; s1.play().then(() => { s1.pause(); s1.currentTime = 0; s1.volume = 0.6; }).catch(()=>{});
+        s2.volume = 0; s2.play().then(() => { s2.pause(); s2.currentTime = 0; s2.volume = 0.7; }).catch(()=>{});
       } catch {}
       window.removeEventListener('pointerdown', primeAudio);
       window.removeEventListener('touchstart', primeAudio);
@@ -117,7 +128,9 @@
     window.addEventListener('pointerdown', primeAudio, { once: true });
     window.addEventListener('touchstart', primeAudio, { once: true });
     window.addEventListener('click', primeAudio, { once: true });
-    function playSwapSound() { const a = getSwapSound(); a.currentTime = 0; a.play().catch(()=>{}); }
+
+    function playSwapSound()  { const a = getSwapSound();  a.currentTime = 0; a.play().catch(()=>{}); }
+    function playMatchSound() { const a = getMatchSound(); a.currentTime = 0; a.play().catch(()=>{}); }
 
     // === Util ===
     const inBounds = (x, y) => x >= 0 && x < SIZE && y >= 0 && y < SIZE;
@@ -182,12 +195,10 @@
           }
         }
       }
-
       return toClear;
     }
 
     function markMatches(toClear) {
-      // feedback visual breve
       toClear.forEach(key => {
         const [x, y] = key.split(',').map(Number);
         cells[y][x].classList.add('match');
@@ -195,6 +206,8 @@
     }
 
     function clearMatches(toClear) {
+      playMatchSound(); // 🔊 som de match
+
       return new Promise(resolve => {
         // anima desaparecer
         toClear.forEach(key => {
@@ -209,7 +222,7 @@
             const [x, y] = key.split(',').map(Number);
             board[y][x] = null;
             const cell = cells[y][x];
-            cell.textContent = ''; // vazio
+            cell.textContent = '';
             cell.classList.remove('match', 'vanish');
           });
           resolve();
@@ -232,7 +245,7 @@
           }
         }
       }
-      // Atualiza DOM conforme board
+      // Atualiza DOM
       for (let y = 0; y < SIZE; y++) {
         for (let x = 0; x < SIZE; x++) {
           cells[y][x].textContent = board[y][x] || '';
@@ -253,7 +266,6 @@
     }
 
     async function resolveBoardCascade() {
-      // Repetir: encontrar matches -> limpar -> gravidade -> refill, até não ter mais
       while (true) {
         const matches = findMatches();
         if (matches.size === 0) break;
@@ -261,23 +273,21 @@
         await clearMatches(matches);
         applyGravity();
         refill();
-        // pequeno intervalo visual entre cascatas
-        await new Promise(r => setTimeout(r, 60));
+        await new Promise(r => setTimeout(r, 60)); // respiro visual
       }
     }
 
     function swapAndResolve(a, b) {
       setBusy(true);
-      // 1) swap no modelo e na tela
+      // 1) swap
       swapModel(a, b);
       renderSwap(a, b);
 
-      // 2) checar se houve match; se não, reverter
+      // 2) valida
       const hasMatch = findMatches().size > 0;
       if (!hasMatch) {
-        // reverte com pequeno delay para o flash tocar
+        // reverte
         setTimeout(() => {
-          // reverte modelo+DOM
           swapModel(a, b);
           renderSwap(a, b);
           setBusy(false);
@@ -285,7 +295,7 @@
         return;
       }
 
-      // 3) houve match: resolve cascata
+      // 3) resolve cascata
       (async () => {
         await resolveBoardCascade();
         setBusy(false);
@@ -293,6 +303,11 @@
     }
 
     // === Interação ===
+    function clearSelection() {
+      if (selected?.el) selected.el.classList.remove('selected');
+      selected = null;
+    }
+
     function chooseCell(x, y) {
       if (busy) return;
       const el = cells[y][x];
@@ -346,7 +361,6 @@
       if (inBounds(nx, ny)) {
         const a = { x: dragStart.x, y: dragStart.y, el: cells[dragStart.y][dragStart.x] };
         const b = { x: nx, y: ny, el: cells[ny][nx] };
-        // limpa visual de seleção
         if (selected?.el) selected.el.classList.remove('selected');
         selected = null;
         swapAndResolve(a, b);
@@ -390,11 +404,9 @@
       }
     }
 
-    // Garante que o tabuleiro inicial não comece com matches (opcional simples)
     function shuffleIfHasInitialMatches(maxTries = 50) {
       for (let i = 0; i < maxTries; i++) {
         if (findMatches().size === 0) return;
-        // embaralha superficialmente
         for (let y = 0; y < SIZE; y++) {
           for (let x = 0; x < SIZE; x++) {
             const rx = Math.floor(Math.random() * SIZE);
