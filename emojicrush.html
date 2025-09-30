@@ -158,16 +158,19 @@
     }
 
     function renderSwap(a, b) {
-      // Atualiza o texto dos dois elementos (visual simples)
       const ea = cells[a.y][a.x];
       const eb = cells[b.y][b.x];
       const tmpTxt = ea.textContent;
       ea.textContent = eb.textContent;
       eb.textContent = tmpTxt;
-
+    
       ea.classList.add('flash');
       eb.classList.add('flash');
-      setTimeout(() => { ea.classList.remove('flash'); eb.classList.remove('flash'); }, 250);
+      playSwapSound();  // 🔔 toca aqui
+      setTimeout(() => {
+        ea.classList.remove('flash');
+        eb.classList.remove('flash');
+      }, 250);
     }
 
     function clearSelection() {
@@ -281,6 +284,14 @@
       }
     }
 
+    const swapSound = document.getElementById('swap-sound');
+    function playSwapSound() {
+      if (swapSound) {
+        swapSound.currentTime = 0;
+        swapSound.play().catch(()=>{});
+      }
+    }
+    
     // Init
     createBoard();
     renderBoard();
