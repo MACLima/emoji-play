@@ -131,6 +131,9 @@
     <p class="hint">Toque em um emoji e depois em um vizinho para trocar. No mobile, um pequeno arrasto também funciona.</p>
   </div>
 
+  <!-- Áudio antes do script para existir no DOM -->
+  <audio id="swap-sound" src="sounds/pop.mp3" preload="auto"></audio>
+
   <script>
     // === Config ===
     const EMOJIS = ["🍎","🍌","🍇","🍓","🍍","🍊","🍒"];
@@ -142,14 +145,43 @@
     let selected = null;     // {x,y, el}
     let dragStart = null;    // {x,y, clientX, clientY}
 
+    // === Som ===
+    let swapSound;
+    function getSwapSound() {
+      if (!swapSound) {
+        swapSound = document.getElementById('swap-sound') || new Audio('sounds/pop.mp3');
+        swapSound.volume = 0.6;
+      }
+      return swapSound;
+    }
+    function primeAudio() {
+      const a = getSwapSound();
+      try {
+        a.volume = 0;
+        a.play().then(() => {
+          a.pause();
+          a.currentTime = 0;
+          a.volume = 0.6;
+        }).catch(()=>{});
+      } catch {}
+      window.removeEventListener('pointerdown', primeAudio);
+      window.removeEventListener('touchstart', primeAudio);
+      window.removeEventListener('click', primeAudio);
+    }
+    window.addEventListener('pointerdown', primeAudio, { once: true });
+    window.addEventListener('touchstart', primeAudio, { once: true });
+    window.addEventListener('click', primeAudio, { once: true });
+
+    function playSwapSound() {
+      const a = getSwapSound();
+      a.currentTime = 0;
+      a.play().catch(()=>{});
+    }
+
     // === Util ===
-    const idx = (x, y) => y * SIZE + x;
     const inBounds = (x, y) => x >= 0 && x < SIZE && y >= 0 && y < SIZE;
     const randomEmoji = () => EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
-
-    function isAdjacent(a, b) {
-      return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
-    }
+    function isAdjacent(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1; }
 
     function swapModel(a, b) {
       const tmp = board[a.y][a.x];
@@ -163,10 +195,10 @@
       const tmpTxt = ea.textContent;
       ea.textContent = eb.textContent;
       eb.textContent = tmpTxt;
-    
+
       ea.classList.add('flash');
       eb.classList.add('flash');
-      playSwapSound();  // 🔔 toca aqui
+      playSwapSound();  // som aqui
       setTimeout(() => {
         ea.classList.remove('flash');
         eb.classList.remove('flash');
@@ -187,18 +219,16 @@
       }
       const other = { x, y, el };
       if (selected.x === x && selected.y === y) {
-        // clicou na mesma célula -> desmarca
         clearSelection();
         return;
       }
       if (!isAdjacent(selected, other)) {
-        // Troca a seleção para o novo
         selected.el.classList.remove('selected');
         selected = other;
         selected.el.classList.add('selected');
         return;
       }
-      // Adjacent -> faz swap
+      // adjacente -> swap
       swapModel(selected, other);
       renderSwap(selected, other);
       clearSelection();
@@ -208,7 +238,6 @@
     function onPointerDown(e, x, y) {
       const touch = e.touches?.[0] || e;
       dragStart = { x, y, clientX: touch.clientX, clientY: touch.clientY };
-      // marca seleção para feedback
       if (!selected) {
         selected = { x, y, el: cells[y][x] };
         selected.el.classList.add('selected');
@@ -221,7 +250,6 @@
       const dx = touch.clientX - dragStart.clientX;
       const dy = touch.clientY - dragStart.clientY;
 
-      // limiar mínimo para considerar swipe
       const TH = 12; // px
       let nx = dragStart.x, ny = dragStart.y;
 
@@ -230,7 +258,6 @@
       } else if (Math.abs(dy) > TH) {
         ny = dragStart.y + (dy > 0 ? 1 : -1);
       } else {
-        // swipe muito curto: trata como clique simples (seleciona)
         chooseCell(dragStart.x, dragStart.y);
         dragStart = null;
         return;
@@ -267,10 +294,9 @@
           cell.dataset.x = x;
           cell.dataset.y = y;
 
-          // Clique/Toque (seleciona e tenta trocar com adjacente)
           cell.addEventListener('click', () => chooseCell(x, y));
 
-          // Suporte a arrastar (pointer/touch/mouse)
+          // Suporte a arrastar/toque
           cell.addEventListener('pointerdown', (e) => onPointerDown(e, x, y));
           cell.addEventListener('pointerup', onPointerUp);
           cell.addEventListener('touchstart', (e) => onPointerDown(e, x, y), { passive: true });
@@ -284,18 +310,9 @@
       }
     }
 
-    const swapSound = document.getElementById('swap-sound');
-    function playSwapSound() {
-      if (swapSound) {
-        swapSound.currentTime = 0;
-        swapSound.play().catch(()=>{});
-      }
-    }
-    
     // Init
     createBoard();
     renderBoard();
   </script>
-  <audio id="swap-sound" src="sounds/pop.mp3" preload="auto"></audio>
 </body>
 </html>
