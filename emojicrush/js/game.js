@@ -10,6 +10,9 @@ const DEFAULT_THEME = "Frutas";
 // === Config ===
 const SIZE = 8;
 const BASE_POINTS_PER_TILE = 10;
+const HINT_IDLE_MS = 30000;   // 30s parado -> mostrar dica
+const HINT_PULSE_MS = 4000;   // quanto tempo a dica pulsa
+const HINT_TOGGLE_MS = 500;   // intervalo do pisca
 
 // === Estado ===
 let currentTheme = localStorage.getItem('emojicrush_theme') || DEFAULT_THEME;
@@ -224,34 +227,108 @@ async function resolveBoardCascade() {
   }
 }
 
-function swapAndResolve(a, b) {
-  setBusy(true);
-  // 1) swap
-  swapModel(a, b);
-  renderSwap(a, b);
+// ===== Dica automática (idle) =====
+let hintIdleTimer = null;
+let hintPulseTimer = null;
+let hintPulseInterval = null;
+let hintPair = null; // {a:{x,y}, b:{x,y}}
 
-  // 2) valida
-  const hasMatch = findMatches().size > 0;
-  if (!hasMatch) {
-    // reverte
-    setTimeout(() => {
-      swapModel(a, b);
-      renderSwap(a, b);
-      setBusy(false);
-    }, 140);
+function resetIdleHintTimer() {
+  stopHintPulse();
+  if (hintIdleTimer) clearTimeout(hintIdleTimer);
+  hintIdleTimer = setTimeout(triggerHint, HINT_IDLE_MS);
+}
+
+function triggerHint() {
+  // Não mostra dica se estiver resolvendo, se há seleção do usuário,
+  // ou se o tabuleiro está em transição
+  if (busy || selected) {
+    resetIdleHintTimer();
     return;
   }
+  const pair = findHintMove();
+  if (!pair) {
+    // Nenhuma jogada possível encontrada (situação rara). Apenas reagenda.
+    resetIdleHintTimer();
+    return;
+  }
+  hintPair = pair;
+  startHintPulse(pair);
+}
 
-  // 3) resolve cascata
-  (async () => {
-    await resolveBoardCascade();
-    setBusy(false);
-  })();
+function findHintMove() {
+  // Procura um par adjacente cuja troca gere matches
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      // direita
+      if (x + 1 < SIZE) {
+        const a = { x, y }, b = { x: x + 1, y };
+        if (wouldMatchAfterSwap(a, b)) return { a, b };
+      }
+      // abaixo
+      if (y + 1 < SIZE) {
+        const a = { x, y }, b = { x, y: y + 1 };
+        if (wouldMatchAfterSwap(a, b)) return { a, b };
+      }
+    }
+  }
+  return null;
+}
+
+function wouldMatchAfterSwap(a, b) {
+  // simula swap no modelo, verifica matches, reverte
+  const va = board[a.y][a.x];
+  const vb = board[b.y][b.x];
+  board[a.y][a.x] = vb;
+  board[b.y][b.x] = va;
+  const has = findMatches().size > 0;
+  // reverte
+  board[a.y][a.x] = va;
+  board[b.y][b.x] = vb;
+  return has;
+}
+
+function startHintPulse(pair) {
+  const ea = cells[pair.a.y][pair.a.x];
+  const eb = cells[pair.b.y][pair.b.x];
+  let on = false;
+
+  // Pisca a classe .selected para aproveitar o estilo existente
+  hintPulseInterval = setInterval(() => {
+    on = !on;
+    if (on) {
+      ea.classList.add('selected');
+      eb.classList.add('selected');
+    } else {
+      ea.classList.remove('selected');
+      eb.classList.remove('selected');
+    }
+  }, HINT_TOGGLE_MS);
+
+  hintPulseTimer = setTimeout(() => {
+    stopHintPulse();
+    resetIdleHintTimer(); // reagenda próxima dica
+  }, HINT_PULSE_MS);
+}
+
+function stopHintPulse() {
+  if (hintPulseInterval) { clearInterval(hintPulseInterval); hintPulseInterval = null; }
+  if (hintPulseTimer) { clearTimeout(hintPulseTimer); hintPulseTimer = null; }
+  if (hintPair) {
+    const ea = cells[hintPair.a.y]?.[hintPair.a.x];
+    const eb = cells[hintPair.b.y]?.[hintPair.b.x];
+    ea && ea.classList.remove('selected');
+    eb && eb.classList.remove('selected');
+    hintPair = null;
+  }
 }
 
 // ===== Interação =====
 function chooseCell(x, y) {
   if (busy) return;
+  stopHintPulse();          // qualquer ação do usuário cancela a dica
+  resetIdleHintTimer();     // reinicia contagem de inatividade
+
   const el = cells[y][x];
   if (!selected) {
     selected = { x, y, el };
@@ -272,6 +349,9 @@ function chooseCell(x, y) {
 
 function onPointerDown(e, x, y) {
   if (busy) return;
+  stopHintPulse();
+  resetIdleHintTimer();
+
   const touch = e.touches?.[0] || e;
   dragStart = { x, y, clientX: touch.clientX, clientY: touch.clientY };
   if (!selected) {
@@ -282,6 +362,9 @@ function onPointerDown(e, x, y) {
 
 function onPointerUp(e) {
   if (busy) return;
+  stopHintPulse();
+  resetIdleHintTimer();
+
   if (!dragStart) return;
   const touch = e.changedTouches?.[0] || e;
   const dx = touch.clientX - dragStart.clientX;
@@ -346,6 +429,9 @@ function renderBoard() {
       cells[y][x] = cell;
     }
   }
+
+  // sempre que o board é renderizado, reagendar dica
+  resetIdleHintTimer();
 }
 
 function shuffleIfHasInitialMatches(maxTries = 50) {
@@ -381,13 +467,44 @@ function populateThemeSelect() {
     // reconstrói o board mantendo pontuação
     createBoard();
     shuffleIfHasInitialMatches();
-    renderBoard();
+    renderBoard(); // também reinicia o timer de dica
   });
 }
 
 // ===== Service Worker (escopo desta pasta) =====
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(()=>{});
+}
+
+// ===== Fluxo de jogada / resolução =====
+function swapAndResolve(a, b) {
+  stopHintPulse();      // ação do usuário cancela dica atual
+  resetIdleHintTimer(); // reinicia contagem
+
+  setBusy(true);
+  // 1) swap
+  swapModel(a, b);
+  renderSwap(a, b);
+
+  // 2) valida
+  const hasMatch = findMatches().size > 0;
+  if (!hasMatch) {
+    // reverte
+    setTimeout(() => {
+      swapModel(a, b);
+      renderSwap(a, b);
+      setBusy(false);
+      resetIdleHintTimer(); // volta a contar
+    }, 140);
+    return;
+  }
+
+  // 3) resolve cascata
+  (async () => {
+    await resolveBoardCascade();
+    setBusy(false);
+    resetIdleHintTimer(); // volta a contar após finalizar
+  })();
 }
 
 // ===== Init =====
