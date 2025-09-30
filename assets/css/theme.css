@@ -1,10 +1,10 @@
 :root {
-  --bg:#0f172a;            /* slate-900 */
-  --panel:#111827;         /* gray-900  */
-  --muted:#1f2937;         /* gray-800  */
-  --txt:#e5e7eb;           /* gray-200  */
-  --accent:#22d3ee;        /* cyan-400  */
-  --accent-2:#a78bfa;      /* violet-400*/
+  --bg:#ffffff;            /* fundo claro */
+  --panel:#f7f7f8;         /* superfícies/painéis claros */
+  --muted:#eef1f5;         /* áreas discretas */
+  --txt:#111827;           /* texto escuro legível */
+  --accent:#22d3ee;        /* cyan-400 */
+  --accent-2:#a78bfa;      /* violet-400 */
 }
 
 *{ box-sizing:border-box }
@@ -23,26 +23,37 @@ header{ display:flex; gap:12px; align-items:center; justify-content:space-betwee
 h1{ font-size:clamp(1.2rem,2.5vw,1.8rem); margin:0; letter-spacing:.3px }
 
 /* Navbar fina */
-.navbar{ display:flex; border-bottom:1px solid rgba(255,255,255,.15); margin:12px 0 16px }
+.navbar{
+  display:flex;
+  border-bottom:1px solid rgba(0,0,0,.12);
+  margin:12px 0 16px
+}
 .nav-item{
   flex:1; background:none; border:none; color:var(--txt);
   font-size:14px; padding:8px 0; cursor:pointer; text-align:center; transition:background .2s
 }
-.nav-item:hover{ background:rgba(255,255,255,.05) }
+.nav-item:hover{ background:rgba(0,0,0,.04) }
 .nav-item.active{ color:var(--accent); font-weight:600; border-bottom:2px solid var(--accent) }
 
 /* Cards/painéis e áreas */
-.card{ background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
-  border:1px solid rgba(255,255,255,.09); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.25) }
-.panel{ padding:14px }
+.card{
+  background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.01));
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08)
+}
+.panel{ padding:14px; background:var(--panel); border:1px solid rgba(0,0,0,.08); border-radius:16px }
 
 /* Controles e inputs */
 .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px }
 .select,.input,.button{
-  appearance:none; border:1px solid rgba(255,255,255,.12);
-  background:#0b1224; color:var(--txt); padding:10px 12px; border-radius:12px; font-size:14px
+  appearance:none; border:1px solid rgba(0,0,0,.12);
+  background:#ffffff; color:var(--txt); padding:10px 12px; border-radius:12px; font-size:14px
 }
-.button.primary{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#0b1020; font-weight:800; border:none }
+.button.primary{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#0b1020; font-weight:800; border:none
+}
 .button.ghost{ background:transparent }
 .controls>*{ min-width:0 }      /* filhos podem encolher */
 
@@ -53,7 +64,6 @@ footer{ opacity:.7; font-size:12px; margin-top:20px; text-align:center }
 .grid-cards{ display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)) }
 .card-link{
   display:block; text-decoration:none; color:var(--txt); padding:20px; border-radius:12px;
-  background:var(--panel); border:1px solid rgba(255,255,255,.1); transition:transform .15s, background .2s
+  background:var(--panel); border:1px solid rgba(0,0,0,.08); transition:transform .15s, background .2s
 }
-.card-link:hover{ background:rgba(255,255,255,.05); transform:translateY(-4px) }
-
+.card-link:hover{ background:rgba(0,0,0,.04); transform:translateY(-4px) }
