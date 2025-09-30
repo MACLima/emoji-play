@@ -1,8 +1,8 @@
 :root {
-  --bg: #0f172a;
-  --panel: #111827;
-  --muted: #1f2937;
-  --txt: #e5e7eb;
+  --bg: #ffffff;
+  --panel: #f7f7f8;
+  --muted: #eef1f5;
+  --txt: #111827;
   --accent: #22d3ee;
   --accent-2: #a78bfa;
 
@@ -50,7 +50,7 @@ header {
 /* Barra de navegação fina */
 .navbar {
   display: flex;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
+  border-bottom: 1px solid rgba(0,0,0,0.12);
   margin-bottom: 12px;
 }
 
@@ -67,7 +67,7 @@ header {
 }
 
 .nav-item:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.04);
 }
 
 .nav-item.active {
@@ -80,12 +80,17 @@ h1 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0; letter-spacing: .3px }
 
 /* Cartões/base */
 .card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.09);
+  background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
 }
-.panel { padding: 14px; }
+.panel {
+  padding: 14px;
+  background: var(--panel);
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,.08);
+}
 
 /* Espaçamento entre os painéis (Leitor e Barra de ferramentas) */
 .container > .panel + .panel { margin-top: 12px; }
@@ -101,8 +106,8 @@ h1 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0; letter-spacing: .3px }
 
 .select, .input, .button {
   appearance:none;
-  border:1px solid rgba(255,255,255,.12);
-  background:#0b1224;
+  border:1px solid rgba(0,0,0,.12);
+  background:#ffffff;
   color:var(--txt);
   padding:10px 12px;
   border-radius:12px;
