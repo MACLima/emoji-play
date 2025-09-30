@@ -1,37 +1,46 @@
-/* Home (index) — apenas o que é específico desta página */
+/* Home (index) — estilos específicos da página inicial */
 
-/* A home usa um container mais estreito e centralizado */
-.wrap { max-width: 800px; margin: 0 auto; padding: 24px; text-align: center; }
+.wrap { max-width:800px; margin:0 auto; padding:24px; text-align:center }
 
-/* Título maior que o padrão global */
-h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); margin-bottom: 16px; }
+h1 { font-size:clamp(1.5rem,4vw,2.5rem); margin-bottom:16px }
 
-/* Espaço do bloco de ações */
-.actions { margin-bottom: 20px; }
+.actions { margin-bottom:20px }
 
-/* Botão da home com gradiente (a home usa .button sem .primary) */
 .button {
-  appearance: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-weight: 800;
-  color: #0b1020;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:800;
+  color:#0b1020;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
 }
 
-/* Grade dos cards da home */
 .games {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display:grid;
+  gap:16px;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 }
 
-/* Textos auxiliares dos cards */
-.emoji { font-size: 36px; margin-bottom: 8px; }
-.title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
-.desc  { font-size: 13px; opacity: .8; }
+/* Cartões da home */
+.card {
+  background:var(--panel);
+  border-radius:12px;
+  padding:20px;
+  text-decoration:none;
+  color:var(--txt);
+  border:1px solid rgba(0,0,0,.08);
+  transition:transform .15s, background .2s;
+}
+.card:hover {
+  background:rgba(0,0,0,.04);
+  transform:translateY(-4px);
+}
 
-/* Rodapé da home: ajuste local (diferente do global) */
-footer { font-size: 12px; opacity: .6; margin-top: 24px; }
+.emoji { font-size:36px; margin-bottom:8px }
+.title { font-weight:600; font-size:16px; margin-bottom:4px }
+.desc  { font-size:13px; opacity:.8 }
+
+/* Rodapé da home (texto já estilizado globalmente; apenas garantias locais) */
+footer { font-size:12px; opacity:.6; margin-top:24px }
