@@ -14,7 +14,7 @@
   <div class="wrap">
     <h1>Emoji Crush</h1>
 
-    <!-- Navbar simples: volta ao Leitor -->
+    <!-- Navbar -->
     <nav class="navbar">
       <button class="nav-item" onclick="location.href='/emojiread'">Leitor</button>
       <button class="nav-item active" onclick="location.href='/emojicrush'">Jogo</button>
@@ -25,6 +25,16 @@
     <div class="hud">
       <div class="pill">Pontos: <span id="score">0</span></div>
     </div>
+
+    <!-- Seletor de tema -->
+    <section class="card panel" aria-label="Tema">
+      <div class="controls">
+        <label>Tema:
+          <select id="themeSelect" class="select"></select>
+        </label>
+        <span style="opacity:.8; font-size:12px">Mude o conjunto de emojis. O jogo segue igual.</span>
+      </div>
+    </section>
 
     <div class="board-wrap">
       <div id="board" class="board" aria-label="Tabuleiro de emojis"></div>
