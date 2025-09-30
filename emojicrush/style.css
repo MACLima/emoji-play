@@ -1,37 +1,92 @@
 /* HUD específico do jogo */
 .hud {
-  display:flex; gap:14px; align-items:center; justify-content:center;
-  margin:6px 0 16px; font-weight:700;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0 16px;
+  font-weight: 700;
 }
+
 .hud .pill {
-  background:rgba(0,0,0,.05);
-  border:1px solid rgba(0,0,0,.1);
-  padding:6px 10px; border-radius:999px;
+  background: rgba(0, 0, 0, .05);
+  border: 1px solid rgba(0, 0, 0, .1);
+  padding: 6px 10px;
+  border-radius: 999px;
 }
 
 /* Animação de pontuação */
-.score-bump { animation:bump .35s ease }
-@keyframes bump { 0%{transform:scale(1)} 40%{transform:scale(1.2)} 100%{transform:scale(1)} }
+.score-bump { animation: bump .35s ease; }
+@keyframes bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
 
 /* Board do jogo */
-.board-wrap { display:flex; justify-content:center }
+.board-wrap {
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden; /* evita overflow lateral no iOS */
+}
+
 .board {
-  display:grid; grid-template-columns:repeat(8,1fr); gap:4px;
-  background:var(--panel); padding:4px;
-  border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,.15);
-  user-select:none; touch-action:none;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr)); /* evita overflow por largura mínima */
+  gap: 4px;
+  background: var(--panel);
+  padding: 4px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, .15);
+  user-select: none;
+  touch-action: none;
+  width: 100%;
+  max-width: 560px;          /* largura máxima fixa para tabuleiro */
+  box-sizing: border-box;    /* inclui padding no cálculo */
 }
+
 .cell {
-  aspect-ratio:1; font-size:28px; display:flex; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.04); border-radius:8px; cursor:pointer;
-  transition:transform .1s, background .2s, box-shadow .2s, opacity .18s; will-change:transform,opacity;
+  aspect-ratio: 1;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, .04);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .1s, background .2s, box-shadow .2s, opacity .18s;
+  will-change: transform, opacity;
+  min-width: 0; /* impede quebra no grid por emojis largos */
 }
-.cell:hover   { transform:scale(1.06); background:rgba(0,0,0,.08) }
-.cell.selected{ outline:2px solid var(--accent); box-shadow:0 0 0 2px var(--accent) inset; background:rgba(34,211,238,.1) }
-.cell.flash   { animation:flash .25s ease }
-@keyframes flash { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
-.cell.match   { background:rgba(0,0,0,.12) }
-.cell.vanish  { opacity:0; transform:scale(.85) }
+
+.cell:hover {
+  transform: scale(1.06);
+  background: rgba(0, 0, 0, .08);
+}
+
+.cell.selected {
+  outline: 2px solid var(--accent);
+  box-shadow: 0 0 0 2px var(--accent) inset;
+  background: rgba(34, 211, 238, .1);
+}
+
+.cell.flash { animation: flash .25s ease; }
+@keyframes flash {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.cell.match { background: rgba(0, 0, 0, .12); }
+.cell.vanish { opacity: 0; transform: scale(.85); }
+
+/* Dica */
+.hint {
+  opacity: .75;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 10px;
+}
 
 /* Bloqueia cliques durante resolução */
-.busy .cell { pointer-events:none }
+.busy .cell { pointer-events: none; }
