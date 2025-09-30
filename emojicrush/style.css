@@ -37,5 +37,8 @@ h1{ margin:0 0 8px; font-size:clamp(1.2rem,2.5vw,1.8rem) }
 
 .hint{ opacity:.75; font-size:12px; text-align:center; margin-top:10px }
 
+/* Footer consistente */
+footer { opacity: .7; font-size: 12px; margin-top: 20px; text-align: center; }
+
 /* Bloqueia cliques durante resolução */
 .busy .cell{ pointer-events:none }
