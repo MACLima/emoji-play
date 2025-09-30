@@ -5,61 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="google-adsense-account" content="ca-pub-8901472162453586">
   <title>Emoji Crush</title>
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#ffffff" />
   <link rel="stylesheet" href="/assets/css/theme.css">
   <link rel="stylesheet" href="./style.css">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8901472162453586" crossorigin="anonymous"></script>
 </head>
 <body>
   <div class="wrap">
-    <h1>Emoji Crush</h1>
+    <header><h1>Emoji Play</h1></header>
 
-    <!-- Navbar -->
     <nav class="navbar">
-      <button class="nav-item" onclick="location.href='/emojiread'">Leitor</button>
-      <button class="nav-item active" onclick="location.href='/emojicrush'">Jogo</button>
+      <button class="nav-item active" onclick="location.href='/emojiread'">Leitor</button>
+      <button class="nav-item" onclick="location.href='/emojicrush'">Jogo</button>
       <button class="nav-item" onclick="location.href='/'">Início</button>
     </nav>
 
-    <!-- HUD -->
-    <div class="hud">
-      <div class="pill">Pontos: <span id="score">0</span></div>
-    </div>
-
-    <!-- Seletor de tema -->
-    <section class="card panel" aria-label="Tema">
+    <main class="panel">
       <div class="controls">
-        <label>Tema:
-          <select id="themeSelect" class="select"></select>
-        </label>
-        <span style="opacity:.8; font-size:12px">Mude o conjunto de emojis. O jogo segue igual.</span>
+        <button id="newGame" class="button">Novo jogo</button>
+        <button id="shuffle" class="button ghost">Embaralhar</button>
       </div>
-    </section>
 
-    <div class="board-wrap">
-      <div id="board" class="board" aria-label="Tabuleiro de emojis"></div>
-    </div>
+      <div id="board" class="board" aria-live="polite"></div>
 
-    <p class="hint">Troque dois vizinhos. A troca só vale se formar 3+. Cascatas dão bônus de pontuação.</p>
+      <div class="status">
+        <span class="badge">Pontuação: <b id="score">0</b></span>
+        <span class="badge">Jogadas: <b id="moves">0</b></span>
+      </div>
+    </main>
+
+    <footer>© Emoji Play</footer>
   </div>
-
-  <footer>
-      Feito com ❤️ para o Luc. Suporta voz nativa do navegador (Chrome/Android, Safari/iOS e Edge).
-  </footer>
-  <!-- Emoji Play -->
-  <ins class="adsbygoogle"
-       style="display:block"
-       data-ad-client="ca-pub-8901472162453586"
-       data-ad-slot="2405173300"
-       data-ad-format="auto"
-       data-full-width-responsive="true"></ins>
-  <script>
-       (adsbygoogle = window.adsbygoogle || []).push({});
-  </script>
-
-  <!-- Áudios locais -->
-  <audio id="swap-sound"  src="./sounds/pop.mp3"   preload="auto"></audio>
-  <audio id="match-sound" src="./sounds/match.mp3" preload="auto"></audio>
 
   <script src="./js/game.js"></script>
 </body>
