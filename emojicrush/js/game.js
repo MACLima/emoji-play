@@ -11,8 +11,7 @@ const DEFAULT_THEME = "Frutas";
 const SIZE = 8;
 const BASE_POINTS_PER_TILE = 10;
 const HINT_IDLE_MS = 30000;   // 30s parado -> mostrar dica
-const HINT_PULSE_MS = 4000;   // quanto tempo a dica pulsa
-const HINT_TOGGLE_MS = 500;   // intervalo do pisca
+const HINT_PULSE_MS = 4000;   // quanto tempo a dica permanece visível
 
 // === Estado ===
 let currentTheme = localStorage.getItem('emojicrush_theme') || DEFAULT_THEME;
@@ -227,10 +226,9 @@ async function resolveBoardCascade() {
   }
 }
 
-// ===== Dica automática (idle) =====
+// ===== Dica automática (idle, compatível com iOS) =====
 let hintIdleTimer = null;
 let hintPulseTimer = null;
-let hintPulseInterval = null;
 let hintPair = null; // {a:{x,y}, b:{x,y}}
 
 function resetIdleHintTimer() {
@@ -291,19 +289,10 @@ function wouldMatchAfterSwap(a, b) {
 function startHintPulse(pair) {
   const ea = cells[pair.a.y][pair.a.x];
   const eb = cells[pair.b.y][pair.b.x];
-  let on = false;
 
-  // Pisca a classe .selected para aproveitar o estilo existente
-  hintPulseInterval = setInterval(() => {
-    on = !on;
-    if (on) {
-      ea.classList.add('selected');
-      eb.classList.add('selected');
-    } else {
-      ea.classList.remove('selected');
-      eb.classList.remove('selected');
-    }
-  }, HINT_TOGGLE_MS);
+  // Classe animada confiável no iOS (definida no CSS como .cell.hinting)
+  ea.classList.add('hinting');
+  eb.classList.add('hinting');
 
   hintPulseTimer = setTimeout(() => {
     stopHintPulse();
@@ -312,13 +301,12 @@ function startHintPulse(pair) {
 }
 
 function stopHintPulse() {
-  if (hintPulseInterval) { clearInterval(hintPulseInterval); hintPulseInterval = null; }
   if (hintPulseTimer) { clearTimeout(hintPulseTimer); hintPulseTimer = null; }
   if (hintPair) {
     const ea = cells[hintPair.a.y]?.[hintPair.a.x];
     const eb = cells[hintPair.b.y]?.[hintPair.b.x];
-    ea && ea.classList.remove('selected');
-    eb && eb.classList.remove('selected');
+    ea && ea.classList.remove('hinting');
+    eb && eb.classList.remove('hinting');
     hintPair = null;
   }
 }
